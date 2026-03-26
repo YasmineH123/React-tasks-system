@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { supabase } from '../lib/supabaseClient';
+import { sendPasswordResetEmail, updateUserPassword } from '../services/authService';
 
 export function usePasswordReset() {
     const [loading, setLoading] = useState(false);
@@ -11,15 +11,10 @@ export function usePasswordReset() {
         setError(null);
         setSuccess(false);
 
-        const { error: sbError } = await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: `${window.location.origin}/reset-password`,
-        });
+        const { error: sbError } = await sendPasswordResetEmail(email);
 
-        if (sbError) {
-            setError('Something went wrong. Please try again.');
-        } else {
-            setSuccess(true);
-        }
+        if (sbError) setError('Something went wrong. Please try again.');
+        else setSuccess(true);
 
         setLoading(false);
     }
@@ -29,15 +24,10 @@ export function usePasswordReset() {
         setError(null);
         setSuccess(false);
 
-        const { error: sbError } = await supabase.auth.updateUser({
-            password: newPassword,
-        });
+        const { error: sbError } = await updateUserPassword(newPassword);
 
-        if (sbError) {
-            setError('Failed to update password. Please try again.');
-        } else {
-            setSuccess(true);
-        }
+        if (sbError) setError('Failed to update password. Please try again.');
+        else setSuccess(true);
 
         setLoading(false);
     }

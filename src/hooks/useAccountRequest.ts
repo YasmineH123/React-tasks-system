@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { supabase } from '../lib/supabaseClient';
+import { submitAccountRequest } from '../services/accountRequestService';
 import type { AccountRequestFormValues } from '../types/accountRequest';
 
 export function useAccountRequest() {
@@ -12,12 +12,10 @@ export function useAccountRequest() {
         setError(null);
         setSuccess(false);
 
-        const { error: sbError } = await supabase
-            .from('account_requests')
-            .insert(values);
+        const { error: sbError } = await submitAccountRequest(values);
 
         if (sbError) {
-            console.log('Supabase error:', sbError.message, sbError.code, sbError.details);
+            console.error('Supabase error:', sbError.message, sbError.code, sbError.details);
             setError('Failed to submit request. Please try again.');
         } else {
             setSuccess(true);

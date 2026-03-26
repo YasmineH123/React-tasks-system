@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabaseClient';
-import type { LoginFormValues } from '../../types/UseAuth';
+import type { LoginFormValues } from '../../types/auth';
 import styles from '../../modules/LoginForm.module.css';
 
 export default function LoginForm() {

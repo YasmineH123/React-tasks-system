@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabaseClient';
-import type { AppUser } from '../types/UseAuth';
+import { fetchUserProfile } from '../services/userService';
+import { getSession, onAuthStateChange } from '../services/authService';
+import type { AppUser } from '../types/auth';
 
 interface AuthState {
   user: AppUser | null;
@@ -8,17 +9,17 @@ interface AuthState {
 }
 
 export function useAuth(): AuthState {
-  const [user, setUser]       = useState<AppUser | null>(null);
+  const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) fetchProfile(session.user.id);
+    getSession().then(({ data: { session } }) => {
+      if (session?.user) loadProfile(session.user.id);
       else setLoading(false);
     });
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) fetchProfile(session.user.id);
+    const { data: listener } = onAuthStateChange((_event, session) => {
+      if (session?.user) loadProfile(session.user.id);
       else {
         setUser(null);
         setLoading(false);
@@ -28,18 +29,13 @@ export function useAuth(): AuthState {
     return () => listener.subscription.unsubscribe();
   }, []);
 
-  async function fetchProfile(userId: string) {
-    const { data, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', userId)
-      .single();
-
+  async function loadProfile(userId: string) {
+    const { data, error } = await fetchUserProfile(userId);
     if (error || !data) {
       console.error('Failed to fetch user profile:', error);
       setUser(null);
     } else {
-      setUser(data as AppUser);
+      setUser(data);
     }
     setLoading(false);
   }
