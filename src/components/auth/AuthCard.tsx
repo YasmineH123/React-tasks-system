@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import styles from '../../modules/AuthCard.module.css';
+import styles from '../../styles/AuthCard.module.css';
 
 interface Props {
     title: string;

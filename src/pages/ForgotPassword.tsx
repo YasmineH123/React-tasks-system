@@ -1,7 +1,7 @@
 import BrandPanel from '../components/auth/BrandPanel';
 import AuthCard from '../components/auth/AuthCard';
 import ForgotPasswordForm from '../components/auth/ForgotPasswordForm';
-import styles from '../modules/Login.module.css';
+import styles from '../styles/Login.module.css';
 
 export default function ForgotPassword() {
   return (

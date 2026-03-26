@@ -1,7 +1,7 @@
 import BrandPanel from '../components/auth/BrandPanel';
 import AuthCard from '../components/auth/AuthCard';
 import RequestAccountForm from '../components/auth/RequestAccountForm';
-import styles from '../modules/Login.module.css';
+import styles from '../styles/Login.module.css';
 
 export default function RequestAccount() {
   return (

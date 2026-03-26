@@ -2,7 +2,6 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { usePasswordReset } from '../../hooks/usePasswordReset';
-import styles from '../../modules/LoginForm.module.css';
 
 export default function ForgotPasswordForm() {
     const [email, setEmail] = useState('');
@@ -15,26 +14,27 @@ export default function ForgotPasswordForm() {
 
     if (success) {
         return (
-            <div className={styles.successBox}>
-                <p className={styles.successTitle}>Check your inbox</p>
-                <p className={styles.successText}>
-                    We sent a password reset link to <strong>{email}</strong>.
-                    Check your spam folder if you don't see it.
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: 'var(--color-primary)', margin: 0 }}>
+                    Check your inbox
                 </p>
-                <Link to="/login" className={styles.link}>Back to sign in</Link>
+                <p style={{ fontSize: 14, color: 'var(--color-text-secondary)', lineHeight: 1.6, margin: 0 }}>
+                    We sent a reset link to <strong>{email}</strong>. Check your spam folder if you don't see it.
+                </p>
+                <Link to="/login" className="link">Back to sign in</Link>
             </div>
         );
     }
 
     return (
-        <form onSubmit={handleSubmit} className={styles.form} noValidate>
-            <div className={styles.field}>
-                <label htmlFor="email" className={styles.label}>Email</label>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }} noValidate>
+            <div className="form-field">
+                <label htmlFor="email" className="form-label">Email</label>
                 <input
                     id="email"
                     name="email"
                     type="email"
-                    className={styles.input}
+                    className="form-input"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     placeholder="you@university.edu"
@@ -43,18 +43,18 @@ export default function ForgotPasswordForm() {
                 />
             </div>
 
-            {error && <p className={styles.error}>{error}</p>}
+            {error && <p className="form-error">{error}</p>}
 
             <button
                 type="submit"
-                className={styles.button}
+                className="btn btn-primary btn-full btn-lg"
                 disabled={loading || !email}
             >
                 {loading ? 'Sending…' : 'Send reset link'}
             </button>
 
-            <p className={styles.footer}>
-                <Link to="/login" className={styles.link}>Back to sign in</Link>
+            <p style={{ fontSize: 14, color: 'var(--color-text-secondary)', textAlign: 'center' }}>
+                <Link to="/login" className="link">Back to sign in</Link>
             </p>
         </form>
     );

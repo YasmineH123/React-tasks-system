@@ -1,4 +1,4 @@
-import styles from '../../modules/BrandPanel.module.css';
+import styles from '../../styles/BrandPanel.module.css';
 
 export default function BrandPanel() {
     return (
@@ -8,7 +8,8 @@ export default function BrandPanel() {
                 <span className={styles.brandName}>Task-Manager</span>
             </div>
             <p className={styles.tagline}>
-                One place for your team's work. Clear tasks, real progress.
+                One place for your team's work.<br />
+                <em>Clear tasks, real progress.</em>
             </p>
         </div>
     );

@@ -2,8 +2,7 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useAccountRequest } from '../../hooks/useAccountRequest';
-import type { AccountRequestFormValues } from '../../types/accountRequest';
-import styles from '../../modules/LoginForm.module.css';
+import type { AccountRequestFormValues, RequestRole } from '../../types/accountRequest';
 
 export default function RequestAccountForm() {
     const { loading, error, success, submitRequest } = useAccountRequest();
@@ -18,7 +17,10 @@ export default function RequestAccountForm() {
     function handleChange(
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
     ) {
-        setValues(prev => ({ ...prev, [e.target.name]: e.target.value || null }));
+        setValues(prev => ({
+            ...prev,
+            [e.target.name]: e.target.value === '' ? null : e.target.value,
+        }));
     }
 
     async function handleSubmit(e: FormEvent<HTMLFormElement>) {
@@ -28,57 +30,97 @@ export default function RequestAccountForm() {
 
     if (success) {
         return (
-            <div className={styles.successBox}>
-                <p className={styles.successTitle}>Request sent</p>
-                <p className={styles.successText}>
-                    Your request has been submitted. Your instructor will review it
-                    and create your account. You'll receive your login details by email.
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: 'var(--color-primary)', margin: 0 }}>
+                    Request sent
                 </p>
-                <Link to="/login" className={styles.link}>Back to sign in</Link>
+                <p style={{ fontSize: 14, color: 'var(--color-text-secondary)', lineHeight: 1.6, margin: 0 }}>
+                    Your request has been submitted. Your instructor will review it and create your account.
+                    You'll receive your login details by email.
+                </p>
+                <Link to="/login" className="link">Back to sign in</Link>
             </div>
         );
     }
 
     return (
-        <form onSubmit={handleSubmit} className={styles.form} noValidate>
-            <div className={styles.field}>
-                <label htmlFor="full_name" className={styles.label}>Full name</label>
-                <input id="full_name" name="full_name" type="text" className={styles.input} value={values.full_name} onChange={handleChange} placeholder="Your full name" autoComplete="name" required/>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }} noValidate>
+            <div className="form-field">
+                <label htmlFor="full_name" className="form-label">Full name</label>
+                <input
+                    id="full_name"
+                    name="full_name"
+                    type="text"
+                    className="form-input"
+                    value={values.full_name}
+                    onChange={handleChange}
+                    placeholder="Your full name"
+                    autoComplete="name"
+                    required
+                />
             </div>
 
-            <div className={styles.field}>
-                <label htmlFor="email" className={styles.label}>Email</label>
-                <input id="email" name="email" type="email" className={styles.input} value={values.email} onChange={handleChange} placeholder="you@university.edu" autoComplete="email" required />
+            <div className="form-field">
+                <label htmlFor="email" className="form-label">Email</label>
+                <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    className="form-input"
+                    value={values.email}
+                    onChange={handleChange}
+                    placeholder="you@university.edu"
+                    autoComplete="email"
+                    required
+                />
             </div>
 
-            <div className={styles.field}>
-                <label htmlFor="role" className={styles.label}>I am a</label>
-                <select id="role" name="role" className={styles.input} value={values.role} onChange={handleChange}>
+            <div className="form-field">
+                <label htmlFor="role" className="form-label">I am a</label>
+                <select
+                    id="role"
+                    name="role"
+                    className="form-input"
+                    value={values.role}
+                    onChange={handleChange}
+                >
                     <option value="student">Student</option>
                     <option value="leader">Team leader</option>
                 </select>
             </div>
 
-            <div className={styles.field}>
-                <label htmlFor="message" className={styles.label}>
-                    Message <span className={styles.optional}>(optional)</span>
+            <div className="form-field">
+                <label htmlFor="message" className="form-label">
+                    Message{' '}
+                    <span style={{ color: 'var(--color-gray-soft)', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>
+                        (optional)
+                    </span>
                 </label>
-                <textarea id="message" name="message" className={`${styles.input} ${styles.textarea}`} value={values.message ?? ''} onChange={handleChange} placeholder="Any additional context for your instructor…" rows={3} />
+                <textarea
+                    id="message"
+                    name="message"
+                    className="form-input"
+                    style={{ resize: 'vertical', minHeight: 80, fontFamily: 'var(--font-body)' }}
+                    value={values.message ?? ''}
+                    onChange={handleChange}
+                    placeholder="Any additional context for your instructor…"
+                    rows={3}
+                />
             </div>
 
-            {error && <p className={styles.error}>{error}</p>}
+            {error && <p className="form-error">{error}</p>}
 
             <button
                 type="submit"
-                className={styles.button}
+                className="btn btn-primary btn-full btn-lg"
                 disabled={loading || !values.full_name || !values.email}
             >
                 {loading ? 'Sending…' : 'Request account'}
             </button>
 
-            <p className={styles.footer}>
+            <p style={{ fontSize: 14, color: 'var(--color-text-secondary)', textAlign: 'center' }}>
                 Already have an account?{' '}
-                <Link to="/login" className={styles.link}>Sign in</Link>
+                <Link to="/login" className="link">Sign in</Link>
             </p>
         </form>
     );

@@ -1,0 +1,56 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.forgotLink {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  text-align: center;
+  transition: color var(--transition);
+}
+
+.forgotLink:hover {
+  color: var(--color-primary);
+}
+
+.footer {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.successBox {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.successTitle {
+  font-family: var(--font-display);
+  font-size: 20px;
+  color: var(--color-primary);
+  margin: 0;
+}
+
+.successText {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 80px;
+  font-family: var(--font-body);
+}
+
+.optional {
+  color: var(--color-gray-soft);
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+}
