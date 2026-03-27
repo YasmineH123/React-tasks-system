@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { useAuthContext } from '../context/AuthContext';
+import styles from '../styles/ProjectDetail.module.css';
 
 type ProjectRow = {
   id: string;
@@ -44,10 +45,10 @@ const statusLabels: Record<TaskCard['status'], string> = {
 };
 
 const statusColors: Record<TaskCard['status'], string> = {
-  todo: '#6c3eb6',
-  in_progress: '#0ea5e9',
-  review: '#f59e0b',
-  done: '#10b981',
+  todo: styles.todo,
+  in_progress: styles.inProgress,
+  review: styles.review,
+  done: styles.done,
 };
 
 export default function ProjectDetail() {
@@ -241,15 +242,15 @@ export default function ProjectDetail() {
   const progress = totalCount === 0 ? 0 : Math.round((doneCount / totalCount) * 100);
 
   if (loading || authLoading) {
-    return <div style={{ padding: '24px' }}>Loading project...</div>;
+    return <div className={styles.loading}>Loading project...</div>;
   }
 
   if (errorMsg) {
     return (
-      <div style={{ padding: '24px' }}>
-        <h2>Project Detail</h2>
-        <p style={{ color: '#b91c1c' }}>{errorMsg}</p>
-        <Link to="/dashboard">Go back</Link>
+      <div className={styles.page}>
+        <h2 className={styles.pageTitle}>Project Detail</h2>
+        <p className="form-error">{errorMsg}</p>
+        <Link to="/dashboard" className="link">Go back</Link>
       </div>
     );
   }
@@ -257,102 +258,59 @@ export default function ProjectDetail() {
   if (!project) return null;
 
   return (
-    <div style={{ padding: '24px' }}>
-      <div style={{ marginBottom: '16px' }}>
-        <h1 style={{ marginBottom: '8px' }}>{project.name}</h1>
-        {project.description ? <p>{project.description}</p> : <p>No project description.</p>}
+    <div className={styles.page}>
+      <div className={styles.headerWrap}>
+        <h1 className={styles.pageTitle}>{project.name}</h1>
+        {project.description ? (
+          <p className={styles.subtitle}>{project.description}</p>
+        ) : (
+          <p className={styles.subtitle}>No project description.</p>
+        )}
       </div>
 
-      <div style={{ marginBottom: '20px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-          <strong>Progress</strong>
-          <span>
+      <div className={styles.card}>
+        <div className={styles.progressTop}>
+          <strong className={styles.sectionTitle}>Progress</strong>
+          <span className={styles.progressText}>
             {doneCount}/{totalCount} done ({progress}%)
           </span>
         </div>
-        <div
-          style={{
-            width: '100%',
-            height: '10px',
-            borderRadius: '8px',
-            background: '#e5e7eb',
-            overflow: 'hidden',
-          }}
-        >
-          <div
-            style={{
-              width: `${progress}%`,
-              height: '100%',
-              background: '#10b981',
-            }}
-          />
+        <div className={styles.progressTrack}>
+          <div className={styles.progressFill} style={{ width: `${progress}%` }} />
         </div>
       </div>
 
       {user?.role === 'leader' && (
-        <div style={{ display: 'flex', gap: '14px', marginBottom: '18px' }}>
-          <Link to={`/projects/${project.id}/tasks/new`}>New Task</Link>
-          <Link to="/team-management">Manage Team</Link>
+        <div className={styles.actionRow}>
+          <Link to={`/projects/${project.id}/tasks/new`} className="btn btn-primary">New Task</Link>
+          <Link to="/team-management" className="btn btn-secondary">Manage Team</Link>
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '20px' }}>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(4, minmax(200px, 1fr))',
-            gap: '12px',
-            alignItems: 'start',
-          }}
-        >
+      <div className={styles.layout}>
+        <div className={styles.board}>
           {(['todo', 'in_progress', 'review', 'done'] as const).map((statusKey) => (
-            <div
-              key={statusKey}
-              style={{
-                background: '#f9fafb',
-                border: '1px solid #e5e7eb',
-                borderRadius: '10px',
-                padding: '10px',
-                minHeight: '260px',
-              }}
-            >
-              <h3 style={{ marginTop: 0, marginBottom: '10px' }}>
+            <div key={statusKey} className={styles.column}>
+              <h3 className={styles.columnTitle}>
                 {statusLabels[statusKey]} ({columns[statusKey].length})
               </h3>
 
-              <div style={{ display: 'grid', gap: '8px' }}>
+              <div className={styles.cardList}>
                 {columns[statusKey].length === 0 && (
-                  <div style={{ color: '#6b7280', fontSize: '14px' }}>No tasks</div>
+                  <div className={styles.emptyState}>No tasks</div>
                 )}
 
                 {columns[statusKey].map((task) => (
                   <Link
                     key={task.id}
                     to={`/tasks/${task.id}`}
-                    style={{
-                      textDecoration: 'none',
-                      color: 'inherit',
-                      background: 'white',
-                      border: '1px solid #e5e7eb',
-                      borderRadius: '8px',
-                      padding: '10px',
-                      display: 'block',
-                    }}
+                    className={styles.taskCard}
                   >
-                    <div style={{ fontWeight: 600, marginBottom: '6px' }}>{task.title}</div>
-                    <div style={{ fontSize: '13px', color: '#4b5563', marginBottom: '6px' }}>
+                    <div className={styles.taskTitle}>{task.title}</div>
+                    <div className={styles.assignee}>
                       Assignee: {task.assigneeName}
                     </div>
-                    <span
-                      style={{
-                        display: 'inline-block',
-                        fontSize: '12px',
-                        color: 'white',
-                        background: statusColors[task.status],
-                        borderRadius: '999px',
-                        padding: '3px 8px',
-                      }}
-                    >
+                    <span className={`${styles.badge} ${statusColors[task.status]}`}>
                       {statusLabels[task.status]}
                     </span>
                   </Link>
@@ -362,19 +320,11 @@ export default function ProjectDetail() {
           ))}
         </div>
 
-        <aside
-          style={{
-            border: '1px solid #e5e7eb',
-            borderRadius: '10px',
-            padding: '12px',
-            background: '#fff',
-            height: 'fit-content',
-          }}
-        >
-          <h3 style={{ marginTop: 0 }}>Team Members ({teamMembers.length})</h3>
-          <div style={{ display: 'grid', gap: '8px' }}>
+        <aside className={styles.memberAside}>
+          <h3 className={styles.sectionTitle}>Team Members ({teamMembers.length})</h3>
+          <div className={styles.memberList}>
             {teamMembers.length === 0 && (
-              <p style={{ color: '#6b7280' }}>No team members found.</p>
+              <p className={styles.emptyState}>No team members found.</p>
             )}
 
             {teamMembers.map((member) => {
@@ -387,35 +337,13 @@ export default function ProjectDetail() {
                 .toUpperCase();
 
               return (
-                <div
-                  key={member.id}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    padding: '6px',
-                    borderRadius: '8px',
-                    border: '1px solid #f0f0f0',
-                  }}
-                >
-                  <div
-                    style={{
-                      width: '28px',
-                      height: '28px',
-                      borderRadius: '999px',
-                      background: '#ede9fe',
-                      color: '#4c1d95',
-                      display: 'grid',
-                      placeItems: 'center',
-                      fontWeight: 700,
-                      fontSize: '12px',
-                    }}
-                  >
+                <div key={member.id} className={styles.memberItem}>
+                  <div className={styles.memberAvatar}>
                     {initials || 'U'}
                   </div>
                   <div>
-                    <div style={{ fontSize: '14px', fontWeight: 600 }}>{name}</div>
-                    <div style={{ fontSize: '12px', color: '#6b7280' }}>{member.email}</div>
+                    <div className={styles.memberName}>{name}</div>
+                    <div className={styles.memberEmail}>{member.email}</div>
                   </div>
                 </div>
               );
@@ -424,8 +352,8 @@ export default function ProjectDetail() {
         </aside>
       </div>
 
-      <div style={{ marginTop: '18px' }}>
-        <Link to="/dashboard">Back to Dashboard</Link>
+      <div className={styles.footerNav}>
+        <Link to="/dashboard" className="link">Back to Dashboard</Link>
       </div>
     </div>
   );

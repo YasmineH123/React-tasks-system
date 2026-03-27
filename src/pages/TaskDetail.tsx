@@ -3,6 +3,7 @@ import type { FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { useAuthContext } from '../context/AuthContext';
+import styles from '../styles/TaskDetail.module.css';
 
 type TaskStatus = 'todo' | 'in_progress' | 'review' | 'done';
 
@@ -324,15 +325,15 @@ export default function TaskDetail() {
   }
 
   if (loading || authLoading) {
-    return <div style={{ padding: '24px' }}>Loading task...</div>;
+    return <div className={styles.loading}>Loading task...</div>;
   }
 
   if (errorMsg && !task) {
     return (
-      <div style={{ padding: '24px' }}>
-        <h2>Task Detail</h2>
-        <p style={{ color: '#b91c1c' }}>{errorMsg}</p>
-        <Link to="/dashboard">Go back</Link>
+      <div className={styles.page}>
+        <h2 className={styles.pageTitle}>Task Detail</h2>
+        <p className="form-error">{errorMsg}</p>
+        <Link to="/dashboard" className="link">Go back</Link>
       </div>
     );
   }
@@ -340,31 +341,33 @@ export default function TaskDetail() {
   if (!task) return null;
 
   return (
-    <div style={{ padding: '24px', maxWidth: '920px', margin: '0 auto' }}>
-      <h1 style={{ marginBottom: '8px' }}>{task.title}</h1>
+    <div className={styles.page}>
+      <div className={styles.card}>
+      <h1 className={styles.pageTitle}>{task.title}</h1>
 
-      <p style={{ marginTop: 0, color: '#4b5563' }}>
+      <p className={styles.helperText}>
         Project: {task.projects?.[0]?.name ?? 'Unknown project'}
       </p>
 
-      <div style={{ marginTop: '14px', marginBottom: '14px' }}>
-        <strong>Description</strong>
-        <p style={{ marginTop: '6px' }}>{task.description ?? 'No description provided.'}</p>
+      <div className={styles.section}>
+        <strong className={styles.sectionTitle}>Description</strong>
+        <p className={styles.bodyText}>{task.description ?? 'No description provided.'}</p>
       </div>
 
-      <div style={{ display: 'grid', gap: '12px', marginBottom: '18px' }}>
+      <div className={styles.metaGrid}>
         <div>
-          <strong>Assignee:</strong> {assigneeName}
+          <strong className={styles.sectionTitle}>Assignee:</strong>{' '}
+          <span className={styles.bodyText}>{assigneeName}</span>
         </div>
 
         <div>
-          <label htmlFor="statusSelect"><strong>Status:</strong> </label>
+          <label htmlFor="statusSelect" className={`${styles.sectionTitle} form-label`}>Status:</label>
           <select
             id="statusSelect"
             value={task.status}
             onChange={(e) => handleStatusChange(e.target.value as TaskStatus)}
             disabled={!canUpdateStatus}
-            style={{ marginLeft: '8px' }}
+            className={`form-input ${styles.statusSelect}`}
           >
             {statusOptions.map((s) => (
               <option key={s.value} value={s.value}>
@@ -373,7 +376,7 @@ export default function TaskDetail() {
             ))}
           </select>
           {!canUpdateStatus && (
-            <p style={{ marginTop: '6px', color: '#6b7280', fontSize: '13px' }}>
+            <p className={styles.helperText}>
               Only the assignee or a leader can update status.
             </p>
           )}
@@ -381,84 +384,63 @@ export default function TaskDetail() {
       </div>
 
       {user?.role === 'leader' && (
-        <div style={{ display: 'flex', gap: '14px', marginBottom: '18px' }}>
-          <Link to={`/tasks/${task.id}/edit`}>Edit Task</Link>
+        <div className={styles.actionRow}>
+          <Link to={`/tasks/${task.id}/edit`} className="btn btn-secondary">Edit Task</Link>
           <button
             type="button"
             onClick={handleDeleteTask}
-            style={{
-              border: 'none',
-              background: '#b91c1c',
-              color: 'white',
-              padding: '6px 10px',
-              borderRadius: '6px',
-              cursor: 'pointer',
-            }}
+            className="btn btn-ghost"
           >
             Delete Task
           </button>
         </div>
       )}
 
-      {errorMsg && <p style={{ color: '#b91c1c' }}>{errorMsg}</p>}
-      {successMsg && <p style={{ color: '#047857' }}>{successMsg}</p>}
+      {errorMsg && <p className="form-error">{errorMsg}</p>}
+      {successMsg && <p className="form-success">{successMsg}</p>}
 
-      <hr style={{ margin: '20px 0' }} />
+      <hr className={styles.divider} />
 
-      <h2 style={{ marginBottom: '10px' }}>Comments</h2>
+      <h2 className={styles.sectionTitle}>Comments</h2>
 
-      <div style={{ display: 'grid', gap: '10px', marginBottom: '16px' }}>
+      <div className={styles.commentsWrap}>
         {comments.length === 0 && (
-          <p style={{ color: '#6b7280' }}>No comments yet.</p>
+          <p className={styles.helperText}>No comments yet.</p>
         )}
 
         {comments.map((c) => (
-          <div
-            key={c.id}
-            style={{
-              border: '1px solid #e5e7eb',
-              borderRadius: '8px',
-              padding: '10px',
-              background: '#fafafa',
-            }}
-          >
-            <div style={{ fontSize: '13px', color: '#4b5563', marginBottom: '6px' }}>
+          <div key={c.id} className={styles.commentCard}>
+            <div className={styles.commentMeta}>
               <strong>{c.authorName}</strong> • {new Date(c.created_at).toLocaleString()}
             </div>
-            <div>{c.content}</div>
+            <div className={styles.bodyText}>{c.content}</div>
           </div>
         ))}
       </div>
 
-      <form onSubmit={handleAddComment}>
-        <label htmlFor="commentInput"><strong>Add Comment</strong></label>
+      <form onSubmit={handleAddComment} className={styles.formWrap}>
+        <label htmlFor="commentInput" className="form-label">Add Comment</label>
         <textarea
           id="commentInput"
           value={commentInput}
           onChange={(e) => setCommentInput(e.target.value)}
           rows={4}
-          style={{ width: '100%', marginTop: '8px', marginBottom: '8px' }}
+          className="form-input"
           placeholder="Write your comment..."
         />
-        {commentError && <p style={{ color: '#b91c1c', marginTop: 0 }}>{commentError}</p>}
+        {commentError && <p className="form-error">{commentError}</p>}
         <button
           type="submit"
           disabled={commentSubmitting}
-          style={{
-            border: 'none',
-            background: '#2563eb',
-            color: 'white',
-            padding: '8px 12px',
-            borderRadius: '6px',
-            cursor: 'pointer',
-          }}
+          className="btn btn-primary"
         >
           {commentSubmitting ? 'Submitting...' : 'Submit Comment'}
         </button>
       </form>
 
-      <div style={{ marginTop: '20px' }}>
-        <Link to={`/projects/${task.project_id}`}>Back to Project</Link>
+      <div className={styles.footerNav}>
+        <Link to={`/projects/${task.project_id}`} className="link">Back to Project</Link>
+      </div>
       </div>
     </div>
   );
