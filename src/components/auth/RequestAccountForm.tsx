@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useAccountRequest } from '../../hooks/useAccountRequest';
-import type { AccountRequestFormValues, RequestRole } from '../../types/accountRequest';
+import type { AccountRequestFormValues } from '../../types/accountRequest';
 
 export default function RequestAccountForm() {
     const { loading, error, success, submitRequest } = useAccountRequest();

@@ -5,6 +5,8 @@ import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import RequestAccount from './pages/RequestAccount';
 import Dashboard from './pages/Dashboard';
+import Board from './pages/Board';
+import TeamManagement from './pages/TeamManagement';
 const router = createBrowserRouter([
     {
         path: '/',
@@ -32,7 +34,16 @@ const router = createBrowserRouter([
     },
     {
         path: '/dashboard',
-        element: <ProtectedRoute><Dashboard/></ProtectedRoute> ,
+        element: <ProtectedRoute><Dashboard/></ProtectedRoute>,
+    },
+    {
+
+        path: '/board',
+        element: <ProtectedRoute><Board /></ProtectedRoute>,
+    },
+    {
+        path: '/team-management',
+        element: <ProtectedRoute><TeamManagement /></ProtectedRoute>,
     },
     {
         path: '*',

@@ -85,7 +85,7 @@ export default function StudentDashboard({ user }: Props) {
                 <div className={styles.card}>
                     <div className={styles.cardHeader}>
                         <span className={styles.cardTitle}>My tasks</span>
-                        <button className={styles.cardLink} onClick={() => navigate('/projects')}>
+                        <button className={styles.cardLink} onClick={() => navigate('/board')}>
                             View all <ArrowRight size={13} />
                         </button>
                     </div>
@@ -98,21 +98,21 @@ export default function StudentDashboard({ user }: Props) {
                             <span className={styles.cardTitle}>Quick actions</span>
                         </div>
                         <div className={styles.qaList}>
-                            <button className={styles.qaItem} onClick={() => navigate('/projects')}>
+                            <button className={styles.qaItem} onClick={() => navigate('/board')}>
                                 <div className={styles.qaIcon} style={{ background: 'rgba(108,62,182,0.1)', color: 'var(--color-primary)' }}>
                                     <ClipboardList size={16} />
                                 </div>
                                 <span className={styles.qaLabel}>View my tasks</span>
                                 <ArrowRight size={14} className={styles.qaArrow} />
                             </button>
-                            <button className={styles.qaItem} onClick={() => navigate('/projects')}>
+                            <button className={styles.qaItem} onClick={() => navigate('/board')}>
                                 <div className={styles.qaIcon} style={{ background: 'rgba(62,213,152,0.12)', color: '#1a7a52' }}>
                                     <FolderOpen size={16} />
                                 </div>
                                 <span className={styles.qaLabel}>Browse projects</span>
                                 <ArrowRight size={14} className={styles.qaArrow} />
                             </button>
-                            <button className={styles.qaItem} onClick={() => navigate('/projects')}>
+                            <button className={styles.qaItem} onClick={() => navigate('/board')}>
                                 <div className={styles.qaIcon} style={{ background: 'rgba(229,106,207,0.1)', color: 'var(--color-accent-pink)' }}>
                                     <LayoutGrid size={16} />
                                 </div>
@@ -125,7 +125,7 @@ export default function StudentDashboard({ user }: Props) {
                     <div className={styles.card} style={{ flex: 1 }}>
                         <div className={styles.cardHeader} style={{ marginBottom: 12 }}>
                             <span className={styles.cardTitle}>Project progress</span>
-                            <button className={styles.cardLink} onClick={() => navigate('/projects')}>
+                            <button className={styles.cardLink} onClick={() => navigate('/board')}>
                                 View all <ArrowRight size={13} />
                             </button>
                         </div>

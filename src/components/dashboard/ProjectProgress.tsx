@@ -16,8 +16,6 @@ function getInitials(name: string): string {
     return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
 }
 
-const AVATAR_COLORS = ['#9B6DE3', '#E56ACF', '#6C3EB6', '#3ED598', '#F59E0B'];
-
 export default function ProjectProgress({ projects }: Props) {
     const navigate = useNavigate();
 
