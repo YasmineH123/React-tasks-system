@@ -5,6 +5,7 @@ export interface AppUser {
     email: string;
     full_name: string | null;
     role: UserRole;
+    avatar_url: string | null;
     created_at: string;
 }
 
