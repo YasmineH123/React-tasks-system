@@ -7,6 +7,9 @@ import RequestAccount from './pages/RequestAccount';
 import Dashboard from './pages/Dashboard';
 import Board from './pages/Board';
 import TeamManagement from './pages/TeamManagement';
+import ProjectDetail from './pages/ProjectDetail';
+import TaskDetail from './pages/TaskDetail';
+
 const router = createBrowserRouter([
     {
         path: '/',
@@ -49,6 +52,14 @@ const router = createBrowserRouter([
         path: '*',
         element: <Navigate to="/dashboard" replace />,
     },
+    {
+        path: '/projects/:id',
+        element: <ProtectedRoute><ProjectDetail /></ProtectedRoute>,
+      },
+      {
+        path: '/tasks/:id',
+        element: <ProtectedRoute><TaskDetail /></ProtectedRoute>,
+      },
 ]);
 
 export default function Router() {
