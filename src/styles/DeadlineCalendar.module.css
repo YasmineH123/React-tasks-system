@@ -1,0 +1,301 @@
+.wrap {
+    background: var(--card-glass);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    box-shadow: var(--shadow-glass);
+    border-radius: var(--radius-lg);
+    display: flex;
+    overflow: hidden;
+}
+
+.yearRow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    padding: 0 12px;
+}
+
+.year {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    min-width: 44px;
+    text-align: center;
+}
+
+.yearBtn {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.8);
+    transition: background var(--transition);
+    flex-shrink: 0;
+}
+
+.yearBtn:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.monthList {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-width: none;
+}
+
+.monthList::-webkit-scrollbar {
+    display: none;
+}
+
+.monthItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 16px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: background var(--transition);
+    border-radius: 0;
+}
+
+.monthItem:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.monthActive {
+    background: rgba(255, 255, 255, 0.18);
+    border-left: 3px solid #E56ACF;
+}
+
+.monthActive:hover {
+    background: rgba(255, 255, 255, 0.22);
+}
+
+.monthName {
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.monthActive .monthName {
+    color: #fff;
+    font-weight: 700;
+}
+
+.monthCount {
+    font-size: 11px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.5);
+    min-width: 16px;
+    text-align: right;
+}
+
+.monthCountActive {
+    color: #E56ACF;
+}
+
+.calHeader {
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.calMonth {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    letter-spacing: 0.08em;
+}
+
+.cell:hover {
+    background: rgba(108, 62, 182, 0.07);
+    color: var(--color-primary);
+}
+
+.clickable {
+    cursor: pointer;
+}
+
+.today {
+    background: #9B6DE3;
+    color: #fff;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(108, 62, 182, 0.35);
+}
+
+.today:hover {
+    background: #7C3AED;
+}
+
+.hasTask {
+    background: #D8CDFF;
+    color: #4A2A8A;
+    font-weight: 600;
+}
+
+.hasTask:hover {
+    background: #C4B5FD;
+}
+
+.deadline {
+    background: #FBCFE8;
+    color: #9D174D;
+    font-weight: 700;
+}
+
+.deadline:hover {
+    background: #F9A8D4;
+}
+
+.dot {
+    display: none;
+}
+
+.tooltip {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--color-white);
+    border: 1px solid rgba(108, 62, 182, 0.12);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+    min-width: 160px;
+    box-shadow: var(--shadow-lg);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    pointer-events: none;
+}
+
+.tooltipItem {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    color: var(--color-text-primary);
+    white-space: nowrap;
+}
+
+.tooltipDot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.legend {
+    display: flex;
+    gap: 14px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(108, 62, 182, 0.06);
+    justify-content: center;
+}
+
+.legendItem {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    color: var(--color-text-secondary);
+}
+
+.legendDot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.sidebar {
+  width: 200px;
+  flex-shrink: 0;
+  background: linear-gradient(180deg, #6C3EB6 0%, #4A2A8A 100%);
+  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.year {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  min-width: 40px;
+  text-align: center;
+}
+
+.monthItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 18px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+
+.monthName {
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.monthCount {
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.5);
+  min-width: 18px;
+  text-align: right;
+}
+
+.main {
+  flex: 1;
+  padding: 20px 16px;
+  min-width: 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+}
+
+.dayLabel {
+  text-align: center;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-gray-soft);
+  padding: 3px 0 6px;
+  letter-spacing: 0.04em;
+}
+
+.cell {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  cursor: default;
+  position: relative;
+  transition: background var(--transition), color var(--transition);
+}

@@ -1,0 +1,112 @@
+.timeline {
+    display: flex;
+    flex-direction: column;
+}
+
+.row {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+}
+
+.bulletCol {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 14px;
+    flex-shrink: 0;
+}
+
+.dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2.5px solid;
+    flex-shrink: 0;
+    z-index: 1;
+}
+
+.line {
+    width: 2px;
+    flex: 1;
+    min-height: 14px;
+    background: var(--color-gray-soft);
+    margin: 3px 0;
+}
+
+.card {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 14px;
+    border-radius: var(--radius-lg);
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: transform var(--transition), box-shadow var(--transition);
+    gap: 10px;
+}
+
+.card:hover {
+    transform: translateX(3px);
+    box-shadow: var(--shadow-sm);
+}
+
+.cardOverdue {
+    border: 1px solid rgba(229, 62, 62, 0.15);
+}
+
+.cardLeft {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.taskTitle {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.due {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 11px;
+    color: var(--color-text-secondary);
+}
+
+.dueRed {
+    color: #E53E3E;
+}
+
+.cardRight {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.pill {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 99px;
+    white-space: nowrap;
+}
+
+.arrow {
+    font-size: 16px;
+    color: var(--color-gray-soft);
+}
+
+.empty {
+    padding: 24px;
+    text-align: center;
+    font-size: 14px;
+    color: var(--color-text-secondary);
+}

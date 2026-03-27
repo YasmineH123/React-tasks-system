@@ -4,7 +4,7 @@ import Login from './pages/Login';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import RequestAccount from './pages/RequestAccount';
-
+import Dashboard from './pages/Dashboard';
 const router = createBrowserRouter([
     {
         path: '/',
@@ -32,7 +32,7 @@ const router = createBrowserRouter([
     },
     {
         path: '/dashboard',
-        element: <ProtectedRoute><div>Dashboard</div></ProtectedRoute>,
+        element: <ProtectedRoute><Dashboard/></ProtectedRoute> ,
     },
     {
         path: '*',
