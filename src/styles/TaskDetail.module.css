@@ -1,0 +1,107 @@
+.page {
+  padding: 24px;
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.loading {
+  padding: 24px;
+  color: var(--color-text-secondary);
+}
+
+.card {
+  background: var(--color-white);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  border: 1px solid rgba(108, 62, 182, 0.14);
+  padding: 24px;
+  display: grid;
+  gap: 14px;
+}
+
+.pageTitle {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 34px;
+}
+
+.sectionTitle {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 22px;
+}
+
+.helperText {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+.bodyText {
+  color: var(--color-text-primary);
+}
+
+.section {
+  display: grid;
+  gap: 6px;
+}
+
+.metaGrid {
+  display: grid;
+  gap: 12px;
+}
+
+.statusSelect {
+  margin-top: 8px;
+}
+
+.actionRow {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.divider {
+  border: 0;
+  border-top: 1px solid rgba(108, 62, 182, 0.14);
+}
+
+.commentsWrap {
+  display: grid;
+  gap: 10px;
+}
+
+.commentCard {
+  border: 1px solid rgba(108, 62, 182, 0.12);
+  border-radius: var(--radius-md);
+  padding: 10px;
+  background: var(--color-bg-solid);
+}
+
+.commentMeta {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin-bottom: 6px;
+}
+
+.formWrap {
+  display: grid;
+  gap: 8px;
+}
+
+.footerNav {
+  margin-top: 8px;
+}
+
+@media (max-width: 760px) {
+  .page {
+    padding: 16px;
+  }
+
+  .card {
+    padding: 16px;
+  }
+
+  .pageTitle {
+    font-size: 30px;
+  }
+}
