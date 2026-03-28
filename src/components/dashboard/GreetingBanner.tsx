@@ -23,7 +23,7 @@ export default function GreetingBanner({ name, tasksDueCount }: Props) {
                 <h1 className={styles.name}>{getGreeting()}, {firstName} !</h1>
                 <p className={styles.sub}>
                     You have <strong>{tasksDueCount} task{tasksDueCount !== 1 ? 's' : ''} due this week</strong>.
-                    {tasksDueCount > 0 ? ' Stay focused — you\'re doing great.' : ' Nothing urgent. Keep it up!'}
+                    {tasksDueCount > 0 ? ' You\'re never behind! Everyday is a new oppurtiunity' : ' Nothing urgent. Keep it up!'}
                 </p>
             </div>
             <div className={styles.statsRow}>

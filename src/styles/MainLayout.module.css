@@ -1,0 +1,12 @@
+.layout {
+    display: flex;
+    min-height: 100vh;
+    background: linear-gradient(145deg, #f3eeff 0%, #fce8f8 40%, #ede8ff 100%);
+    background-attachment: fixed;
+}
+
+.main {
+    flex: 1;
+    min-width: 0;
+    overflow-y: auto;
+}

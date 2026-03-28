@@ -1,0 +1,424 @@
+.sidebar {
+    width: 232px;
+    flex-shrink: 0;
+    background: rgba(243, 238, 255, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-right: 1px solid rgba(255, 255, 255, 0.6);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    transition: width 0.25s ease;
+    overflow: hidden;
+    z-index: 50;
+    transition: width 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.collapsed {
+    width: 68px;
+}
+
+.top {
+    padding: 20px 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid rgba(108, 62, 182, 0.07);
+    flex-shrink: 0;
+    position: relative;
+    min-height: 72px;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    overflow: hidden;
+}
+
+.brandMark {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #E56ACF, #6C3EB6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(108, 62, 182, 0.3);
+}
+
+.brandText {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.brandName {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+}
+
+.brandSub {
+    font-size: 10px;
+    color: var(--color-text-secondary);
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.collapseBtn {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    background: rgba(108, 62, 182, 0.08);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-primary);
+    flex-shrink: 0;
+    transition: background var(--transition);
+}
+
+.collapseBtn:hover {
+    background: rgba(108, 62, 182, 0.16);
+}
+
+.nav {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 10px 0;
+    scrollbar-width: none;
+}
+
+.nav::-webkit-scrollbar {
+    display: none;
+}
+
+.section {
+    padding: 8px 10px 4px;
+}
+
+.sectionLabel {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-gray-soft);
+    padding: 0 8px;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.divider {
+    height: 1px;
+    background: rgba(108, 62, 182, 0.07);
+    margin: 4px 10px;
+}
+
+.navItem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    border-radius: 0;
+    cursor: pointer;
+    text-decoration: none;
+    color: var(--color-text-secondary);
+    position: relative;
+    margin: 1px 0;
+    transition: color var(--transition);
+}
+
+.navItem:not(.navActive):hover {
+    color: var(--color-primary);
+}
+
+.navItem:not(.navActive):hover .navIcon {
+    background: rgba(108, 62, 182, 0.08);
+    color: var(--color-primary);
+}
+
+.navActive {
+    background: linear-gradient(145deg, #dcceff 0%, #fbd0f3 40%, #d6ccfa 100%);
+    color: var(--color-primary);
+    border-radius: 12px 0 0 12px;
+    margin-left: 0;
+    margin-right: -1px;
+    padding-right: 11px;
+}
+
+.curveTop,
+.curveBottom {
+    position: absolute;
+    right: -1px;
+    width: 16px;
+    height: 16px;
+    background: linear-gradient(145deg, #f3eeff 0%, #fce8f8 40%, #ede8ff 100%);
+    pointer-events: none;
+}
+
+.curveTop {
+    top: -16px;
+    border-bottom-right-radius: 12px;
+    box-shadow: 4px 4px 0 4px rgba(243, 238, 255, 0.85);
+}
+
+.curveBottom {
+    bottom: -16px;
+    border-top-right-radius: 12px;
+    box-shadow: 4px -4px 0 4px rgba(243, 238, 255, 0.85);
+}
+
+.navIcon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--color-text-secondary);
+    transition: all var(--transition);
+}
+
+.navIconActive {
+    background: linear-gradient(135deg, #E56ACF, #6C3EB6);
+    color: #fff !important;
+    box-shadow: 0 3px 10px rgba(108, 62, 182, 0.3);
+}
+
+.navLabel {
+    font-size: 13px;
+    font-weight: 500;
+    flex: 1;
+    white-space: nowrap;
+}
+
+.navActive .navLabel {
+    font-weight: 600;
+    color: var(--color-primary-deep);
+}
+
+.badge {
+    font-size: 10px;
+    font-weight: 700;
+    background: var(--color-accent-pink);
+    color: #fff;
+    padding: 2px 7px;
+    border-radius: 99px;
+    min-width: 18px;
+    text-align: center;
+}
+
+.bottom {
+    padding: 12px 10px 16px;
+    border-top: 1px solid rgba(108, 62, 182, 0.07);
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.userCard {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    border-radius: 12px;
+    background: rgba(108, 62, 182, 0.05);
+    border: 1px solid rgba(108, 62, 182, 0.08);
+    cursor: pointer;
+    transition: background var(--transition);
+    overflow: hidden;
+}
+
+.userCard:hover {
+    background: rgba(108, 62, 182, 0.1);
+}
+
+.userAvatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #E56ACF, #6C3EB6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(108, 62, 182, 0.25);
+}
+
+.avatarImg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.userInfo {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+}
+
+.userName {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.userRole {
+    font-size: 10px;
+    color: var(--color-text-secondary);
+    text-transform: capitalize;
+    margin-top: 1px;
+}
+
+.signOutBtn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    width: 100%;
+    font-family: var(--font-body);
+    transition: background var(--transition);
+}
+
+.signOutBtn:hover {
+    background: rgba(229, 62, 62, 0.07);
+}
+
+.signOutIcon {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(229, 62, 62, 0.09);
+    color: #E53E3E;
+    flex-shrink: 0;
+}
+
+.signOutText {
+    font-size: 13px;
+    font-weight: 500;
+    color: #E53E3E;
+}
+
+.collapsed .top {
+    justify-content: center;
+    padding: 20px 0 16px;
+}
+
+.collapseBtnCentered {
+    position: static;
+    margin: 0 auto;
+}
+
+.collapsed .brand {
+    justify-content: center;
+    width: 100%;
+}
+
+.collapsed .top {
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px 0;
+}
+
+.chevron {
+    color: var(--color-gray-soft);
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+}
+
+.chevronOpen {
+    transform: rotate(180deg);
+}
+
+.subList {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 2px 0 4px 0;
+    padding-left: 20px;
+    border-left: 2px solid rgba(108, 62, 182, 0.1);
+    margin-left: 28px;
+}
+
+.subItem {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: all var(--transition);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.subItem:hover {
+    background: rgba(108, 62, 182, 0.06);
+    color: var(--color-primary);
+}
+
+.subItemActive {
+    color: var(--color-primary);
+    font-weight: 600;
+    background: rgba(108, 62, 182, 0.06);
+}
+
+.subDot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--color-primary-light);
+    flex-shrink: 0;
+}
+
+.subName {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sectionLabel {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-gray-soft);
+    padding: 0 18px;
+    display: block;
+    margin-bottom: 4px;
+    margin-top: 8px;
+}
