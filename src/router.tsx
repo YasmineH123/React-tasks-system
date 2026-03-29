@@ -8,8 +8,11 @@ import RequestAccount from './pages/RequestAccount';
 import Dashboard from './pages/Dashboard';
 import Board from './pages/Board';
 import TeamManagement from './pages/TeamManagement';
+import InstructorManagement from './pages/InstructorManagement';
+import Profile from './pages/Profile';
 import ProjectDetail from './pages/ProjectDetail';
 import TaskDetail from './pages/TaskDetail';
+import Projects from './pages/Projects';
 
 const router = createBrowserRouter([
     { path: '/', element: <Navigate to="/dashboard" replace /> },
@@ -26,12 +29,13 @@ const router = createBrowserRouter([
         ),
         children: [
             { path: '/dashboard', element: <Dashboard /> },
-            { path: '/projects', element: <div style={{ padding: 32 }}>Projects — coming soon</div> },
+            { path: '/projects', element: <Projects /> },
             { path: '/projects/:id', element: <ProjectDetail /> },
             { path: '/tasks/:id', element: <TaskDetail /> },
             { path: '/board', element: <Board /> },
             { path: '/teams', element: <TeamManagement /> },
-            { path: '/profile', element: <div style={{ padding: 32 }}>Profile — coming soon</div> },
+            { path: '/instructor/manage', element: <InstructorManagement /> },
+            { path: '/profile', element: <Profile /> },
         ],
     },
 

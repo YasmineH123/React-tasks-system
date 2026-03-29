@@ -51,6 +51,7 @@ const statusOptions: { value: TaskStatus; label: string }[] = [
 
 export default function TaskDetail() {
   const { id } = useParams();
+  const hasValidId = Boolean(id);
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuthContext();
 
@@ -67,12 +68,6 @@ export default function TaskDetail() {
   const [commentSubmitting, setCommentSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!id) {
-      setErrorMsg('Task id is missing from URL.');
-      setLoading(false);
-      return;
-    }
-
     if (authLoading) return;
     if (!user) {
       navigate('/login', { replace: true });
@@ -197,6 +192,16 @@ export default function TaskDetail() {
     if (!user || !task) return false;
     return user.role === 'leader' || task.assigned_to === user.id;
   }, [user, task]);
+
+  if (!hasValidId) {
+    return (
+      <div className={styles.page}>
+        <h2 className={styles.pageTitle}>Task Detail</h2>
+        <p className="form-error">Task id is missing from URL.</p>
+        <Link to="/dashboard" className="link">Go back</Link>
+      </div>
+    );
+  }
 
   async function handleStatusChange(newStatus: TaskStatus) {
     if (!task || !canUpdateStatus) return;
