@@ -1,5 +1,6 @@
 import { useAuthContext } from '../context/AuthContext';
 import StudentDashboard from '../components/dashboard/StudentDashboard';
+import LeaderDashboard from '../components/dashboard/LeaderDashboard';
 
 export default function Dashboard() {
     const { user, loading } = useAuthContext();
@@ -7,6 +8,5 @@ export default function Dashboard() {
     if (loading || !user) return null;
 
     if (user.role === 'student') return <StudentDashboard user={user} />;
-    if (user.role === 'leader') return <div>Leader dashboard — coming soon</div>;
-    return <div>Instructor dashboard — coming soon</div>;
+if (user.role === 'leader')     return <LeaderDashboard     user={user} />;    return <div>Instructor dashboard — coming soon</div>;
 }

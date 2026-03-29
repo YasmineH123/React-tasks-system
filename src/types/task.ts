@@ -53,3 +53,8 @@ export interface TaskWithAssignee extends Task {
         email: string;
     } | null;
 }
+
+export interface EnrichedTask extends Task {
+    assignee_name?: string | null;
+    project_name?: string | null;
+}

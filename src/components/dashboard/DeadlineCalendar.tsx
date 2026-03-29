@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import type { Task } from '../../types/task';
+import type { EnrichedTask } from '../../types/task';
 import styles from '../../styles/DeadlineCalendar.module.css';
 
-interface Props { tasks: Task[]; }
+interface Props {
+    tasks: EnrichedTask[];
+}
 
 const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MONTHS = [
@@ -22,7 +24,7 @@ export default function DeadlineCalendar({ tasks }: Props) {
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const firstDaySun = new Date(year, month, 1).getDay();
 
-    const tasksByDay: Record<number, Task[]> = {};
+    const tasksByDay: Record<number, EnrichedTask[]> = {};
     tasks.forEach(task => {
         if (!task.due_date) return;
         const d = new Date(task.due_date);
@@ -41,12 +43,11 @@ export default function DeadlineCalendar({ tasks }: Props) {
         }).length;
     }
 
-    function prevYear() { setYear(y => y - 1); }
-    function nextYear() { setYear(y => y + 1); }
-
     function handleDayClick(day: number) {
         const dayTasks = tasksByDay[day];
-        if (dayTasks?.length === 1) navigate(`/tasks/${dayTasks[0].id}`);
+        if (!dayTasks?.length) return;
+        if (dayTasks.length === 1) navigate(`/tasks/${dayTasks[0].id}`);
+        else navigate('/board');
     }
 
     const cells: (number | null)[] = [
@@ -56,12 +57,15 @@ export default function DeadlineCalendar({ tasks }: Props) {
 
     return (
         <div className={styles.wrap}>
-
             <div className={styles.sidebar}>
                 <div className={styles.yearRow}>
-                    <button className={styles.yearBtn} onClick={prevYear}><ChevronLeft size={13} /></button>
+                    <button className={styles.yearBtn} onClick={() => setYear(y => y - 1)}>
+                        <ChevronLeft size={13} />
+                    </button>
                     <span className={styles.year}>{year}</span>
-                    <button className={styles.yearBtn} onClick={nextYear}><ChevronRight size={13} /></button>
+                    <button className={styles.yearBtn} onClick={() => setYear(y => y + 1)}>
+                        <ChevronRight size={13} />
+                    </button>
                 </div>
                 <div className={styles.monthList}>
                     {MONTHS.map((m, i) => {
@@ -100,7 +104,9 @@ export default function DeadlineCalendar({ tasks }: Props) {
                         const isToday = day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
                         const dayTasks = tasksByDay[day] ?? [];
                         const hasTask = dayTasks.length > 0;
-                        const hasOverdue = dayTasks.some(t => t.due_date && new Date(t.due_date) < today && t.status !== 'done');
+                        const hasOverdue = dayTasks.some(t =>
+                            t.due_date && new Date(t.due_date) < today && t.status !== 'done'
+                        );
 
                         return (
                             <div
@@ -119,15 +125,31 @@ export default function DeadlineCalendar({ tasks }: Props) {
                                 {day}
                                 {hoveredDay === day && dayTasks.length > 0 && (
                                     <div className={styles.tooltip}>
-                                        {dayTasks.map(t => (
-                                            <div key={t.id} className={styles.tooltipItem}>
-                                                <span
-                                                    className={styles.tooltipDot}
-                                                    style={{ background: t.status === 'done' ? '#3ED598' : hasOverdue ? '#E53E3E' : '#9B6DE3' }}
-                                                />
-                                                {t.title}
-                                            </div>
-                                        ))}
+                                        {dayTasks.map(t => {
+                                            const overdue = t.due_date && new Date(t.due_date) < today && t.status !== 'done';
+                                            return (
+                                                <div key={t.id} className={styles.tooltipItem}>
+                                                    <span
+                                                        className={styles.tooltipDot}
+                                                        style={{
+                                                            background: t.status === 'done'
+                                                                ? '#3ED598'
+                                                                : overdue
+                                                                    ? '#E53E3E'
+                                                                    : '#9B6DE3'
+                                                        }}
+                                                    />
+                                                    <div className={styles.tooltipContent}>
+                                                        <span className={styles.tooltipTitle}>{t.title}</span>
+                                                        {(t.assignee_name || t.project_name) && (
+                                                            <span className={styles.tooltipMeta}>
+                                                                {[t.assignee_name, t.project_name].filter(Boolean).join(' · ')}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 )}
                             </div>
@@ -136,12 +158,20 @@ export default function DeadlineCalendar({ tasks }: Props) {
                 </div>
 
                 <div className={styles.legend}>
-                    <div className={styles.legendItem}><span className={styles.legendDot} style={{ background: '#D8CDFF' }} />Has task</div>
-                    <div className={styles.legendItem}><span className={styles.legendDot} style={{ background: '#FBCFE8' }} />Deadline</div>
-                    <div className={styles.legendItem}><span className={styles.legendDot} style={{ background: '#9B6DE3' }} />Today</div>
+                    <div className={styles.legendItem}>
+                        <span className={styles.legendDot} style={{ background: '#D8CDFF' }} />
+                        Has task
+                    </div>
+                    <div className={styles.legendItem}>
+                        <span className={styles.legendDot} style={{ background: '#FBCFE8' }} />
+                        Deadline / overdue
+                    </div>
+                    <div className={styles.legendItem}>
+                        <span className={styles.legendDot} style={{ background: '#9B6DE3' }} />
+                        Today
+                    </div>
                 </div>
             </div>
-
         </div>
     );
 }

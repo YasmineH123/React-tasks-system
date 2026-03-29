@@ -73,8 +73,11 @@ export default function StudentDashboard({ user }: Props) {
                 </div>
             </div>
 
-            <GreetingBanner name={user.full_name} tasksDueCount={dueThisWeek.length} />
-
+            <GreetingBanner name={user.full_name} statValue={dueThisWeek.length} statLabel="Due this week" subMessage={
+                <>         You have <strong>{dueThisWeek.length} task{dueThisWeek.length !== 1 ? 's' : ''} due this week</strong>.
+                    {dueThisWeek.length > 0 ? " Stay focused — you're doing great." : ' Nothing urgent. Keep it up!'}     </>}
+            />
+            
             <div className={styles.statsRow}>
                 <StatCard icon={ClipboardList} value={tasks.length} label="Assigned tasks" variant="purple" />
                 <StatCard icon={CheckCircle} value={completedCount} label="Completed" variant="blue" />

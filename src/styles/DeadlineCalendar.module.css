@@ -172,11 +172,10 @@
 
 .tooltipItem {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 7px;
     font-size: 12px;
     color: var(--color-text-primary);
-    white-space: nowrap;
 }
 
 .tooltipDot {
@@ -286,4 +285,26 @@
     cursor: default;
     position: relative;
     transition: background var(--transition), color var(--transition);
+}
+
+.tooltipContent {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+}
+
+.tooltipTitle {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tooltipMeta {
+    font-size: 10px;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
 }
