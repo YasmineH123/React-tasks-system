@@ -17,6 +17,7 @@ export default function Projects() {
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
+  const [studentSearch, setStudentSearch] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
@@ -113,6 +114,15 @@ export default function Projects() {
     }
   }
 
+  const normalizedSearch = studentSearch.trim().toLowerCase();
+  const filteredStudents = students.filter(student => {
+    if (!normalizedSearch) return true;
+    return (
+      student.full_name?.toLowerCase().includes(normalizedSearch) ||
+      student.email.toLowerCase().includes(normalizedSearch)
+    );
+  });
+
   if (isLoading) {
     return (
       <div style={{ padding: 32, textAlign: 'center' }}>
@@ -197,6 +207,20 @@ export default function Projects() {
             <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 8 }}>
               Select Team Members ({formData.selectedStudents.length} selected)
             </label>
+            <input
+              type="text"
+              value={studentSearch}
+              onChange={(e) => setStudentSearch(e.target.value)}
+              placeholder="Search by name or email"
+              style={{
+                width: '100%',
+                padding: '8px 10px',
+                marginBottom: 8,
+                borderRadius: 4,
+                border: '1px solid #D1D5DB',
+                fontSize: 13,
+              }}
+            />
             <div style={{
               maxHeight: '300px',
               overflowY: 'auto',
@@ -204,10 +228,10 @@ export default function Projects() {
               borderRadius: 4,
               padding: '8px',
             }}>
-              {students.length === 0 ? (
-                <div style={{ padding: '12px', color: '#666', fontSize: 13 }}>No members available</div>
+              {filteredStudents.length === 0 ? (
+                <div style={{ padding: '12px', color: '#666', fontSize: 13 }}>No matching members found.</div>
               ) : (
-                students.map(student => (
+                filteredStudents.map(student => (
                   <div
                     key={student.id}
                     style={{

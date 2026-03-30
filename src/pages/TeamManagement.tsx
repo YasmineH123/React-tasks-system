@@ -27,96 +27,97 @@ export default function TeamManagement() {
 
     const [projects, setProjects] = useState<ProjectWithTeam[]>([]);
     const [allUsers, setAllUsers] = useState<AllUsers[]>([]);
+    const [selectedUsersForProject, setSelectedUsersForProject] = useState<Record<string, string[]>>({});
+    const [searchQueries, setSearchQueries] = useState<Record<string, string>>({});
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [selectedUserId, setSelectedUserId] = useState<string>('');
 
-    useEffect(() => {
-        async function loadData() {
-            if (!user) return;
+    async function loadData() {
+        if (!user) return;
 
-            setIsLoading(true);
-            setError(null);
+        setIsLoading(true);
+        setError(null);
 
-            try {
-                if (user.role !== 'leader' && user.role !== 'instructor') {
-                    setError('You do not have permission to access this page.');
+        try {
+            if (user.role !== 'leader' && user.role !== 'instructor') {
+                setError('You do not have permission to access this page.');
+                setIsLoading(false);
+                return;
+            }
+
+            let projects_list;
+
+            if (user.role === 'leader') {
+                const { data: leaderProjects, error: projError } = await supabase
+                    .from('projects')
+                    .select('id, name, team_id, created_by, description')
+                    .eq('created_by', user.id);
+
+                if (projError) {
+                    setError('Failed to load projects.');
                     setIsLoading(false);
                     return;
                 }
 
-                let projects_list;
+                projects_list = leaderProjects as any[];
+            } else {
+                const { data: allProjects, error: projError } = await supabase
+                    .from('projects')
+                    .select('id, name, team_id, created_by, description');
 
-                if (user.role === 'leader') {
-                    const { data: leaderProjects, error: projError } = await supabase
-                        .from('projects')
-                        .select('id, name, team_id, created_by, description')
-                        .eq('created_by', user.id);
-
-                    if (projError) {
-                        setError('Failed to load projects.');
-                        setIsLoading(false);
-                        return;
-                    }
-
-                    projects_list = leaderProjects as any[];
-                } else {
-                    const { data: allProjects, error: projError } = await supabase
-                        .from('projects')
-                        .select('id, name, team_id, created_by, description');
-
-                    if (projError) {
-                        setError('Failed to load projects.');
-                        setIsLoading(false);
-                        return;
-                    }
-
-                    projects_list = allProjects as any[];
+                if (projError) {
+                    setError('Failed to load projects.');
+                    setIsLoading(false);
+                    return;
                 }
 
-                const projectsWithMembers: ProjectWithTeam[] = [];
-
-                for (const project of projects_list || []) {
-                    const { data: teamMembers, error: membersError } = await supabase
-                        .from('team_members')
-                        .select('user_id')
-                        .eq('team_id', (project as any).team_id);
-
-                    if (membersError) continue;
-
-                    const memberIds = (teamMembers as any[])?.map(m => m.user_id) || [];
-                    const { data: userData } = memberIds.length > 0
-                        ? await supabase
-                              .from('users')
-                              .select('id, full_name, email')
-                              .in('id', memberIds)
-                        : { data: [] };
-
-                    projectsWithMembers.push({
-                        id: (project as any).id,
-                        name: (project as any).name,
-                        team_id: (project as any).team_id,
-                        created_by: (project as any).created_by,
-                        description: (project as any).description,
-                        teamMembers: (userData as TeamMember[]) || [],
-                        isExpanded: false,
-                    });
-                }
-
-                const { data: users } = await supabase
-                    .from('users')
-                    .select('id, full_name, email')
-                    .eq('role', 'student');
-
-                setProjects(projectsWithMembers);
-                setAllUsers((users as AllUsers[]) || []);
-                setIsLoading(false);
-            } catch (err) {
-                setError('Unexpected error loading data.');
-                setIsLoading(false);
+                projects_list = allProjects as any[];
             }
-        }
 
+            const projectsWithMembers: ProjectWithTeam[] = [];
+
+            for (const project of projects_list || []) {
+                const { data: teamMembers, error: membersError } = await supabase
+                    .from('team_members')
+                    .select('user_id')
+                    .eq('team_id', (project as any).team_id);
+
+                if (membersError) continue;
+
+                const memberIds = (teamMembers as any[])?.map(m => m.user_id) || [];
+                const { data: userData } = memberIds.length > 0
+                    ? await supabase
+                          .from('users')
+                          .select('id, full_name, email')
+                          .in('id', memberIds)
+                    : { data: [] };
+
+                projectsWithMembers.push({
+                    id: (project as any).id,
+                    name: (project as any).name,
+                    team_id: (project as any).team_id,
+                    created_by: (project as any).created_by,
+                    description: (project as any).description,
+                    teamMembers: (userData as TeamMember[]) || [],
+                    isExpanded: false,
+                });
+            }
+
+            const { data: users } = await supabase
+                .from('users')
+                .select('id, full_name, email')
+                .eq('role', 'student');
+
+            setProjects(projectsWithMembers);
+            setAllUsers((users as AllUsers[]) || []);
+            setIsLoading(false);
+        } catch (err) {
+            setError('Unexpected error loading data.');
+            setIsLoading(false);
+        }
+    }
+
+    useEffect(() => {
         loadData();
     }, [user]);
 
@@ -136,28 +137,43 @@ export default function TeamManagement() {
         if (!project) return;
 
         try {
-            const { data: existing } = await supabase
+            console.log('🔍 Checking if user already exists in team:', { projectId, userId, teamId: project.team_id });
+            
+            const { data: existing, error: checkError } = await supabase
                 .from('team_members')
                 .select('id')
                 .eq('team_id', project.team_id)
                 .eq('user_id', userId);
 
+            if (checkError) {
+                console.error('❌ Error checking existing members:', checkError);
+                setError(`Error checking members: ${checkError.message}`);
+                return;
+            }
+
             if (existing && existing.length > 0) {
+                console.warn('⚠️ User already a member');
                 setError('This user is already a member of this team.');
                 return;
             }
 
-            const { error: addError } = await supabase
+            console.log('➕ Attempting to add member to team_members table');
+            const { data: insertData, error: addError } = await supabase
                 .from('team_members')
-                .insert({ team_id: project.team_id, user_id: userId });
+                .insert({ team_id: project.team_id, user_id: userId })
+                .select();
 
             if (addError) {
+                console.error('❌ Failed to add member:', addError);
                 setError(`Failed to add member: ${addError.message}`);
                 return;
             }
 
+            console.log('✅ Member added successfully to database:', insertData);
+
             const selectedUser = allUsers.find(u => u.id === userId);
             if (selectedUser) {
+                console.log('🔄 Updating local state with new member:', selectedUser);
                 setProjects(prev =>
                     prev.map(p =>
                         p.id === projectId
@@ -167,10 +183,11 @@ export default function TeamManagement() {
                 );
             }
 
-            setSelectedUserId('');
             setError(null);
+            console.log('✨ Member added successfully!');
         } catch (err) {
-            setError('Unexpected error adding member.');
+            console.error('❌ Unexpected error adding member:', err);
+            setError(`Unexpected error adding member: ${err instanceof Error ? err.message : 'Unknown error'}`);
         }
     }
 
@@ -342,28 +359,107 @@ export default function TeamManagement() {
                                         )}
                                     </div>
 
-                                    <div className={styles.addMemberSection}>
-                                        <div className={styles.sectionLabel}>➕ Add Member</div>
-                                        <div className={styles.addMemberRow}>
-                                            <select
-                                                value={selectedUserId}
-                                                onChange={e => setSelectedUserId(e.target.value)}
-                                                className={`form-input ${styles.addMemberSelect}`}
-                                            >
-                                                <option value="">Select a student to add</option>
-                                                {allUsers.map(u => (
-                                                    <option key={u.id} value={u.id}>
-                                                        {u.full_name || u.email}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                            <button
-                                                onClick={() => addMemberToProject(project.id, selectedUserId)}
-                                                className={`btn btn-primary ${styles.addMemberBtn}`}
-                                            >
-                                                Add Member
-                                            </button>
+                                    <div className={styles.addMemberSection} style={{ padding: 16 }}>
+                                        <div style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 8, color: '#1C1C1E' }}>
+                                            Select Team Members ({(selectedUsersForProject[project.id] || []).length} selected)
                                         </div>
+                                        <input
+                                            type="text"
+                                            value={searchQueries[project.id] || ''}
+                                            onChange={e => setSearchQueries(prev => ({ ...prev, [project.id]: e.target.value }))}
+                                            placeholder="Search by name or email"
+                                            className="form-input"
+                                            style={{ marginBottom: 8, width: '100%', padding: '8px 10px', fontSize: 13 }}
+                                        />
+                                        
+                                        <div style={{
+                                            maxHeight: '200px',
+                                            overflowY: 'auto',
+                                            border: '1px solid #D1D5DB',
+                                            borderRadius: 4,
+                                            padding: '8px',
+                                            marginBottom: '16px',
+                                            backgroundColor: '#fff'
+                                        }}>
+                                            {(() => {
+                                                const search = (searchQueries[project.id] || '').trim().toLowerCase();
+                                                const filtered = allUsers
+                                                    .filter(u => !project.teamMembers.some(m => m.id === u.id))
+                                                    .filter(u => {
+                                                        if (!search) return true;
+                                                        const name = u.full_name?.toLowerCase() || '';
+                                                        const email = u.email.toLowerCase();
+                                                        return name.includes(search) || email.includes(search);
+                                                    });
+
+                                                if (filtered.length === 0) {
+                                                    return <div style={{ padding: '12px', color: '#666', fontSize: 13 }}>No matching members found.</div>;
+                                                }
+
+                                                return filtered.map(student => {
+                                                    const isSelected = (selectedUsersForProject[project.id] || []).includes(student.id);
+                                                    return (
+                                                        <div
+                                                            key={student.id}
+                                                            style={{
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                padding: '8px',
+                                                                cursor: 'pointer',
+                                                                borderRadius: 4,
+                                                                backgroundColor: isSelected ? '#E0D4F7' : 'transparent',
+                                                            }}
+                                                            onClick={e => {
+                                                                e.stopPropagation();
+                                                                setSelectedUsersForProject(prev => {
+                                                                    const selected = prev[project.id] || [];
+                                                                    return {
+                                                                        ...prev,
+                                                                        [project.id]: isSelected 
+                                                                            ? selected.filter(id => id !== student.id)
+                                                                            : [...selected, student.id]
+                                                                    };
+                                                                });
+                                                            }}
+                                                        >
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={isSelected}
+                                                                onChange={() => {}}
+                                                                style={{ marginRight: 8, cursor: 'pointer' }}
+                                                            />
+                                                            <div>
+                                                                <div style={{ fontSize: 13, fontWeight: 500, color: '#1C1C1E' }}>
+                                                                    {student.full_name || 'Unknown'}
+                                                                </div>
+                                                                <div style={{ fontSize: 12, color: '#666' }}>
+                                                                    {student.email}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                });
+                                            })()}
+                                        </div>
+
+                                        <button
+                                            onClick={async () => {
+                                                const userIds = selectedUsersForProject[project.id] || [];
+                                                if (userIds.length === 0) return;
+                                                
+                                                for (const uid of userIds) {
+                                                    await addMemberToProject(project.id, uid);
+                                                }
+                                                
+                                                setSelectedUsersForProject(prev => ({ ...prev, [project.id]: [] }));
+                                                setSearchQueries(prev => ({ ...prev, [project.id]: '' }));
+                                            }}
+                                            disabled={!(selectedUsersForProject[project.id]?.length > 0)}
+                                            className={`btn btn-primary ${styles.addMemberBtn}`}
+                                            style={{ width: '100%', fontSize: 13, padding: '10px' }}
+                                        >
+                                            Add {(selectedUsersForProject[project.id] || []).length} Member{(selectedUsersForProject[project.id] || []).length !== 1 ? 's' : ''}
+                                        </button>
                                     </div>
                                 </div>
                             )}

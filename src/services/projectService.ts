@@ -43,6 +43,7 @@ export async function createProjectWithStudents(input: CreateProjectWithStudents
       .from('teams')
       .insert({
         name: `${name} Team`,
+        created_by: createdBy,
       })
       .select()
       .single();
