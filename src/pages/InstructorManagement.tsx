@@ -5,7 +5,7 @@ import styles from '../styles/InstructorManagement.module.css';
 import type { Task } from '../types/task';
 import type { AppUser } from '../types/auth';
 import type { AccountRequest } from '../types/accountRequest';
-import { fetchAllAccountRequests, updateAccountRequestStatus } from '../services/accountRequestService';
+import { fetchAllAccountRequests, approveAccountRequest, rejectAccountRequest, createUserDirectly } from '../services/accountRequestService';
 
 interface ProjectSummary {
   id: string;
@@ -28,6 +28,34 @@ export default function InstructorManagement() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [approvalAction, setApprovalAction] = useState<string | null>(null);
+
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newUserForm, setNewUserForm] = useState({ full_name: '', email: '', role: 'student' });
+  const [createLoading, setCreateLoading] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+
+  async function handleCreateUser() {
+    if (!newUserForm.full_name || !newUserForm.email) return;
+    setCreateLoading(true);
+    setCreateError(null);
+
+    const { error } = await createUserDirectly(
+      newUserForm.email,
+      newUserForm.full_name,
+      newUserForm.role
+    );
+
+    if (error) {
+      setCreateError(error.message);
+      setCreateLoading(false);
+      return;
+    }
+
+    setShowAddModal(false);
+    setNewUserForm({ full_name: '', email: '', role: 'student' });
+    setCreateLoading(false);
+    alert(`Account created and email sent to ${newUserForm.email}`);
+  }
 
   useEffect(() => {
     async function loadData() {
@@ -132,7 +160,7 @@ export default function InstructorManagement() {
       console.log('Starting approval process for request:', request.id);
 
       // First, update the request status
-      const { error: statusError } = await updateAccountRequestStatus(request.id, 'approved');
+      const { error: statusError } = await approveAccountRequest(request.id);
       if (statusError) {
         console.error('Error updating request status:', statusError);
         throw new Error(`Failed to update request status: ${statusError.message}`);
@@ -159,7 +187,7 @@ export default function InstructorManagement() {
   async function handleRejectRequest(requestId: string) {
     setApprovalAction(requestId);
     try {
-      const { error } = await updateAccountRequestStatus(requestId, 'rejected');
+      const { error } = await rejectAccountRequest(requestId);
       if (error) {
         console.error('Error updating request status:', error);
         throw new Error('Failed to update request status');
@@ -214,10 +242,28 @@ export default function InstructorManagement() {
   }
 
   return (
+
     <div className={styles.container}>
       <div className={styles.header}>
-        <h1 className={styles.headerTitle}>Instructor Management</h1>
-        <p className={styles.headerSubtitle}>Manage account requests, view projects, teams, and task progress.</p>
+        <div>
+          <h1 className={styles.headerTitle}>Instructor Management</h1>
+          <p className={styles.headerSubtitle}>Manage account requests, view projects, teams, and task progress.</p>
+        </div>
+        <button
+          onClick={() => setShowAddModal(true)}
+          style={{
+            padding: '10px 20px',
+            background: 'linear-gradient(135deg, #E56ACF, #6C3EB6)',
+            color: '#fff',
+            border: 'none',
+            borderRadius: 10,
+            fontWeight: 600,
+            fontSize: 14,
+            cursor: 'pointer',
+          }}
+        >
+          + Add member
+        </button>
       </div>
 
       {/* Account Requests Section */}
@@ -359,6 +405,85 @@ export default function InstructorManagement() {
                 </div>
               );
             })}
+          </div>
+        </div>
+      )}
+      {showAddModal && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000,
+        }}>
+          <div style={{
+            background: '#fff', borderRadius: 16, padding: 32,
+            width: '100%', maxWidth: 420, boxShadow: '0 8px 32px rgba(108,62,182,0.2)',
+          }}>
+            <h2 style={{ margin: '0 0 20px', fontSize: 18, fontWeight: 700, color: '#1C1C1E' }}>
+              Add new member
+            </h2>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div className="form-field">
+                <label className="form-label">Full name</label>
+                <input
+                  className="form-input"
+                  type="text"
+                  placeholder="Full name"
+                  value={newUserForm.full_name}
+                  onChange={e => setNewUserForm(p => ({ ...p, full_name: e.target.value }))}
+                />
+              </div>
+
+              <div className="form-field">
+                <label className="form-label">Email</label>
+                <input
+                  className="form-input"
+                  type="email"
+                  placeholder="email@university.edu"
+                  value={newUserForm.email}
+                  onChange={e => setNewUserForm(p => ({ ...p, email: e.target.value }))}
+                />
+              </div>
+
+              <div className="form-field">
+                <label className="form-label">Role</label>
+                <select
+                  className="form-input"
+                  value={newUserForm.role}
+                  onChange={e => setNewUserForm(p => ({ ...p, role: e.target.value }))}
+                >
+                  <option value="student">Student</option>
+                  <option value="leader">Team Leader</option>
+                </select>
+              </div>
+
+              {createError && <p className="form-error">{createError}</p>}
+            </div>
+
+            <div style={{ display: 'flex', gap: 10, marginTop: 24 }}>
+              <button
+                onClick={() => { setShowAddModal(false); setCreateError(null); }}
+                style={{
+                  flex: 1, padding: '10px', background: '#F5F5F7',
+                  border: 'none', borderRadius: 8, fontSize: 14,
+                  fontWeight: 600, cursor: 'pointer', color: '#6E6E73',
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreateUser}
+                disabled={createLoading || !newUserForm.full_name || !newUserForm.email}
+                style={{
+                  flex: 2, padding: '10px',
+                  background: 'linear-gradient(135deg, #E56ACF, #6C3EB6)',
+                  border: 'none', borderRadius: 8, fontSize: 14,
+                  fontWeight: 600, cursor: 'pointer', color: '#fff',
+                  opacity: createLoading ? 0.7 : 1,
+                }}
+              >
+                {createLoading ? 'Creating...' : 'Create account'}
+              </button>
+            </div>
           </div>
         </div>
       )}
