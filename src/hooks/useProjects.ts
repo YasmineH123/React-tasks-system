@@ -11,10 +11,30 @@ export function useProjects(userId: string) {
 
     useEffect(() => {
         if (!userId) return;
-        supabase
-            .from('projects')
-            .select('id, name')
-            .then(({ data }) => setProjects(data ?? []));
+
+        const fetchProjects = async () => {
+            const { data } = await supabase
+                .from('projects')
+                .select('id, name');
+            setProjects(data ?? []);
+        };
+
+        fetchProjects();
+
+        const channel = supabase
+            .channel(`projects-channel-${userId}`)
+            .on(
+                'postgres_changes',
+                { event: '*', schema: 'public', table: 'projects' },
+                () => {
+                    fetchProjects();
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
     }, [userId]);
 
     return projects;

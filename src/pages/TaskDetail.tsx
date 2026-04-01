@@ -211,7 +211,6 @@ export default function TaskDetail() {
 
     const previousStatus = task.status;
 
-    // optimistic UI update
     setTask((prev) => (prev ? { ...prev, status: newStatus } : prev));
 
     const { error } = await supabase
@@ -220,7 +219,6 @@ export default function TaskDetail() {
       .eq('id', task.id);
 
     if (error) {
-      // rollback on failure
       setTask((prev) => (prev ? { ...prev, status: previousStatus } : prev));
       setErrorMsg('Failed to update status. Please try again.');
       return;
@@ -348,104 +346,104 @@ export default function TaskDetail() {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-      <h1 className={styles.pageTitle}>{task.title}</h1>
+        <h1 className={styles.pageTitle}>{task.title}</h1>
 
-      <p className={styles.helperText}>
-        Project: {task.projects?.[0]?.name ?? 'Unknown project'}
-      </p>
+        <p className={styles.helperText}>
+          Project: {task.projects?.[0]?.name ?? 'Unknown project'}
+        </p>
 
-      <div className={styles.section}>
-        <strong className={styles.sectionTitle}>Description</strong>
-        <p className={styles.bodyText}>{task.description ?? 'No description provided.'}</p>
-      </div>
-
-      <div className={styles.metaGrid}>
-        <div>
-          <strong className={styles.sectionTitle}>Assignee:</strong>{' '}
-          <span className={styles.bodyText}>{assigneeName}</span>
+        <div className={styles.section}>
+          <strong className={styles.sectionTitle}>Description</strong>
+          <p className={styles.bodyText}>{task.description ?? 'No description provided.'}</p>
         </div>
 
-        <div>
-          <label htmlFor="statusSelect" className={`${styles.sectionTitle} form-label`}>Status:</label>
-          <select
-            id="statusSelect"
-            value={task.status}
-            onChange={(e) => handleStatusChange(e.target.value as TaskStatus)}
-            disabled={!canUpdateStatus}
-            className={`form-input ${styles.statusSelect}`}
-          >
-            {statusOptions.map((s) => (
-              <option key={s.value} value={s.value}>
-                {s.label}
-              </option>
-            ))}
-          </select>
-          {!canUpdateStatus && (
-            <p className={styles.helperText}>
-              Only the assignee or a leader can update status.
-            </p>
-          )}
+        <div className={styles.metaGrid}>
+          <div>
+            <strong className={styles.sectionTitle}>Assignee:</strong>{' '}
+            <span className={styles.bodyText}>{assigneeName}</span>
+          </div>
+
+          <div>
+            <label htmlFor="statusSelect" className={`${styles.sectionTitle} form-label`}>Status:</label>
+            <select
+              id="statusSelect"
+              value={task.status}
+              onChange={(e) => handleStatusChange(e.target.value as TaskStatus)}
+              disabled={!canUpdateStatus}
+              className={`form-input ${styles.statusSelect}`}
+            >
+              {statusOptions.map((s) => (
+                <option key={s.value} value={s.value}>
+                  {s.label}
+                </option>
+              ))}
+            </select>
+            {!canUpdateStatus && (
+              <p className={styles.helperText}>
+                Only the assignee or a leader can update status.
+              </p>
+            )}
+          </div>
         </div>
-      </div>
 
-      {user?.role === 'leader' && (
-        <div className={styles.actionRow}>
-          <Link to={`/tasks/${task.id}/edit`} className="btn btn-secondary">Edit Task</Link>
-          <button
-            type="button"
-            onClick={handleDeleteTask}
-            className="btn btn-ghost"
-          >
-            Delete Task
-          </button>
-        </div>
-      )}
-
-      {errorMsg && <p className="form-error">{errorMsg}</p>}
-      {successMsg && <p className="form-success">{successMsg}</p>}
-
-      <hr className={styles.divider} />
-
-      <h2 className={styles.sectionTitle}>Comments</h2>
-
-      <div className={styles.commentsWrap}>
-        {comments.length === 0 && (
-          <p className={styles.helperText}>No comments yet.</p>
+        {user?.role === 'leader' && (
+          <div className={styles.actionRow}>
+            <Link to={`/tasks/${task.id}/edit`} className="btn btn-secondary">Edit Task</Link>
+            <button
+              type="button"
+              onClick={handleDeleteTask}
+              className="btn btn-ghost"
+            >
+              Delete Task
+            </button>
+          </div>
         )}
 
-        {comments.map((c) => (
-          <div key={c.id} className={styles.commentCard}>
-            <div className={styles.commentMeta}>
-              <strong>{c.authorName}</strong> • {new Date(c.created_at).toLocaleString()}
+        {errorMsg && <p className="form-error">{errorMsg}</p>}
+        {successMsg && <p className="form-success">{successMsg}</p>}
+
+        <hr className={styles.divider} />
+
+        <h2 className={styles.sectionTitle}>Comments</h2>
+
+        <div className={styles.commentsWrap}>
+          {comments.length === 0 && (
+            <p className={styles.helperText}>No comments yet.</p>
+          )}
+
+          {comments.map((c) => (
+            <div key={c.id} className={styles.commentCard}>
+              <div className={styles.commentMeta}>
+                <strong>{c.authorName}</strong> • {new Date(c.created_at).toLocaleString()}
+              </div>
+              <div className={styles.bodyText}>{c.content}</div>
             </div>
-            <div className={styles.bodyText}>{c.content}</div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
 
-      <form onSubmit={handleAddComment} className={styles.formWrap}>
-        <label htmlFor="commentInput" className="form-label">Add Comment</label>
-        <textarea
-          id="commentInput"
-          value={commentInput}
-          onChange={(e) => setCommentInput(e.target.value)}
-          rows={4}
-          className="form-input"
-          placeholder="Write your comment..."
-        />
-        {commentError && <p className="form-error">{commentError}</p>}
-        <button
-          type="submit"
-          disabled={commentSubmitting}
-          className="btn btn-primary"
-        >
-          {commentSubmitting ? 'Submitting...' : 'Submit Comment'}
-        </button>
-      </form>
+        <form onSubmit={handleAddComment} className={styles.formWrap}>
+          <label htmlFor="commentInput" className="form-label">Add Comment</label>
+          <textarea
+            id="commentInput"
+            value={commentInput}
+            onChange={(e) => setCommentInput(e.target.value)}
+            rows={4}
+            className="form-input"
+            placeholder="Write your comment..."
+          />
+          {commentError && <p className="form-error">{commentError}</p>}
+          <button
+            type="submit"
+            disabled={commentSubmitting}
+            className="btn btn-primary"
+          >
+            {commentSubmitting ? 'Submitting...' : 'Submit Comment'}
+          </button>
+        </form>
 
-      <div className={styles.footerNav}>
-        <Link to={`/projects/${task.project_id}`} className="link">Back to Project</Link>
-      </div>
+        <div className={styles.footerNav}>
+          <Link to={`/projects/${task.project_id}`} className="link">Back to Project</Link>
+        </div>
       </div>
     </div>
   );
