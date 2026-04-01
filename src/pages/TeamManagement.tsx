@@ -251,12 +251,16 @@ export default function TeamManagement() {
                             Manage teams and add or remove members from your projects
                         </p>
                     </div>
-                    {projects.length > 0 && (
+                    <div style={{ display: 'flex', gap: '16px' }}>
                         <div className={styles.statsCard}>
                             <div className={styles.statsLabel}>Total Projects</div>
                             <div className={styles.statsValue}>{projects.length}</div>
                         </div>
-                    )}
+                        <div className={styles.statsCard}>
+                            <div className={styles.statsLabel}>Total Members</div>
+                            <div className={styles.statsValue}>{allUsers.length}</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -294,6 +298,7 @@ export default function TeamManagement() {
                                                 : 'Shared project'}
                                         </div>
                                     </div>
+                                
                                 </div>
                                 <div
                                     className={`${styles.projectChevron} ${

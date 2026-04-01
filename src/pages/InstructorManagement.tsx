@@ -28,6 +28,7 @@ export default function InstructorManagement() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [approvalAction, setApprovalAction] = useState<string | null>(null);
+  const [totalMembersCount, setTotalMembersCount] = useState(0);
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [newUserForm, setNewUserForm] = useState({ full_name: '', email: '', role: 'student' });
@@ -72,6 +73,16 @@ export default function InstructorManagement() {
         const { data: requestsData, error: requestsError } = await fetchAllAccountRequests();
         if (requestsError) throw requestsError;
         setAccountRequests(requestsData || []);
+
+        // Fetch total member count
+        const { count: usersCount } = await supabase
+          .from('users')
+          .select('*', { count: 'exact', head: true })
+          .in('role', ['student', 'leader']);
+        
+        if (usersCount !== null) {
+          setTotalMembersCount(usersCount);
+        }
 
         // Fetch projects
         const { data: projectsData, error: projectsError } = await supabase
@@ -350,8 +361,12 @@ export default function InstructorManagement() {
           <div className={styles.statsValue}>{overallStats.teamCount}</div>
         </div>
         <div className={styles.statsCard}>
-          <div className={styles.statsLabel}>Members</div>
+          <div className={styles.statsLabel}>Assigned Members</div>
           <div className={styles.statsValue}>{overallStats.memberCount}</div>
+        </div>
+        <div className={styles.statsCard}>
+          <div className={styles.statsLabel}>Total Members</div>
+          <div className={styles.statsValue}>{totalMembersCount}</div>
         </div>
         <div className={styles.statsCard}>
           <div className={styles.statsLabel}>Total Tasks</div>
