@@ -79,12 +79,11 @@ export default function InstructorManagement() {
           .from('users')
           .select('*', { count: 'exact', head: true })
           .in('role', ['student', 'leader']);
-        
+
         if (usersCount !== null) {
           setTotalMembersCount(usersCount);
         }
 
-        // Fetch projects
         const { data: projectsData, error: projectsError } = await supabase
           .from('projects')
           .select('id,name,description,team_id,created_by');
@@ -179,8 +178,6 @@ export default function InstructorManagement() {
 
       console.log('Request status updated successfully');
 
-      // For now, just update the status and inform the instructor
-      // Account creation will be handled separately or manually
       setAccountRequests(prev =>
         prev.map(r => (r.id === request.id ? { ...r, status: 'approved' } : r))
       );
@@ -382,7 +379,7 @@ export default function InstructorManagement() {
         <div className={styles.emptyState}>
           <div className={styles.emptyIcon}>👩‍🏫</div>
           <div className={styles.emptyTitle}>No projects available yet</div>
-          <div className={styles.emptySubtitle}>Ask project leaders to create projects to begin tracking.</div>
+          <div className={styles.emptySubtitle}>Create projects to begin tracking.</div>
         </div>
       ) : (
         <div>

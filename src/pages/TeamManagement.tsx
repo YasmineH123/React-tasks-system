@@ -271,12 +271,10 @@ export default function TeamManagement() {
                 <div className={styles.emptyState}>
                     <div className={styles.emptyIcon}>📋</div>
                     <p className={styles.emptyTitle}>
-                        {user?.role === 'leader' ? 'No projects created yet' : 'No projects found'}
+                        No projects found
                     </p>
                     <p className={styles.emptySubtitle}>
-                        {user?.role === 'leader'
-                            ? 'Create a project to start managing teams'
-                            : 'Instructors can manage all projects'}
+                        Instructors need to create projects before teams can be managed.
                     </p>
                 </div>
             ) : (

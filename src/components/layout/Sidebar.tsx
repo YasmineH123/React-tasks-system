@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import {
     LayoutDashboard, FolderOpen, LayoutGrid,
-    Users, GraduationCap, User, LogOut, ChevronDown,
+    Users, GraduationCap, User, LogOut, ChevronDown, FolderPlus,
 } from 'lucide-react';
 import { useAuthContext } from '../../context/AuthContext';
 import { signOut } from '../../services/authService';
@@ -201,6 +201,23 @@ export default function Sidebar() {
                                         <Users size={17} />
                                     </div>
                                     {isExpanded && <span className={styles.navLabel}>Manage</span>}
+                                    {isActive && <div className={styles.curveBottom} />}
+                                </>
+                            )}
+                        </NavLink>
+                        <NavLink
+                            to="/projects/create"
+                            className={({ isActive }) =>
+                                `${styles.navItem} ${isActive ? styles.navActive : ''}`
+                            }
+                        >
+                            {({ isActive }) => (
+                                <>
+                                    {isActive && <div className={styles.curveTop} />}
+                                    <div className={`${styles.navIcon} ${isActive ? styles.navIconActive : ''}`}>
+                                        <FolderPlus size={17} />
+                                    </div>
+                                    {isExpanded && <span className={styles.navLabel}>Create Project</span>}
                                     {isActive && <div className={styles.curveBottom} />}
                                 </>
                             )}

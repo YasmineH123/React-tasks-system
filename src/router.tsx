@@ -13,6 +13,7 @@ import Profile from './pages/Profile';
 import ProjectDetail from './pages/ProjectDetail';
 import TaskDetail from './pages/TaskDetail';
 import Projects from './pages/Projects';
+import CreateProject from './pages/CreateProject';
 
 const router = createBrowserRouter([
     { path: '/', element: <Navigate to="/dashboard" replace /> },
@@ -30,6 +31,7 @@ const router = createBrowserRouter([
         children: [
             { path: '/dashboard', element: <Dashboard /> },
             { path: '/projects', element: <Projects /> },
+            { path: '/projects/create', element: <CreateProject /> },
             { path: '/projects/:id', element: <ProjectDetail /> },
             { path: '/tasks/:id', element: <TaskDetail /> },
             { path: '/board', element: <Board /> },
