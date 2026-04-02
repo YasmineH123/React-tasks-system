@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import {
-    LayoutDashboard, FolderOpen, LayoutGrid,
-    Users, GraduationCap, User, LogOut, ChevronDown, FolderPlus,
+    LayoutDashboard, FolderOpen, FolderPlus, LayoutGrid, ClipboardList,
+    Users, GraduationCap, User, LogOut, ChevronDown,
 } from 'lucide-react';
 import { useAuthContext } from '../../context/AuthContext';
 import { signOut } from '../../services/authService';
@@ -20,16 +20,10 @@ export default function Sidebar() {
     const [projectsOpen, setProjectsOpen] = useState(false);
 
     const isExpanded = hoverExpanded;
-
     const isProjectsActive = location.pathname.startsWith('/projects');
 
-    function handleMouseEnter() {
-        if (!hoverExpanded) setHoverExpanded(true);
-    }
-
-    function handleMouseLeave() {
-        setHoverExpanded(false);
-    }
+    function handleMouseEnter() { if (!hoverExpanded) setHoverExpanded(true); }
+    function handleMouseLeave() { setHoverExpanded(false); }
 
     async function handleSignOut() {
         await signOut();
@@ -57,14 +51,14 @@ export default function Sidebar() {
                     )}
                 </div>
             </div>
+
             <nav className={styles.nav}>
                 {isExpanded && <span className={styles.sectionLabel}>Main</span>}
 
+                {/* Dashboard */}
                 <NavLink
                     to="/dashboard"
-                    className={({ isActive }) =>
-                        `${styles.navItem} ${isActive ? styles.navActive : ''}`
-                    }
+                    className={({ isActive }) => `${styles.navItem} ${isActive ? styles.navActive : ''}`}
                 >
                     {({ isActive }) => (
                         <>
@@ -78,6 +72,7 @@ export default function Sidebar() {
                     )}
                 </NavLink>
 
+                {/* Projects — collapsible */}
                 <div
                     className={`${styles.navItem} ${isProjectsActive ? styles.navActive : ''}`}
                     onClick={() => setProjectsOpen(v => !v)}
@@ -104,9 +99,7 @@ export default function Sidebar() {
                         <NavLink
                             to="/projects"
                             end
-                            className={({ isActive }) =>
-                                `${styles.subItem} ${isActive ? styles.subItemActive : ''}`
-                            }
+                            className={({ isActive }) => `${styles.subItem} ${isActive ? styles.subItemActive : ''}`}
                         >
                             All projects
                         </NavLink>
@@ -114,9 +107,7 @@ export default function Sidebar() {
                             <NavLink
                                 key={p.id}
                                 to={`/projects/${p.id}`}
-                                className={({ isActive }) =>
-                                    `${styles.subItem} ${isActive ? styles.subItemActive : ''}`
-                                }
+                                className={({ isActive }) => `${styles.subItem} ${isActive ? styles.subItemActive : ''}`}
                             >
                                 <span className={styles.subDot} />
                                 <span className={styles.subName}>{p.name}</span>
@@ -125,11 +116,10 @@ export default function Sidebar() {
                     </div>
                 )}
 
+                {/* Board */}
                 <NavLink
                     to="/board"
-                    className={({ isActive }) =>
-                        `${styles.navItem} ${isActive ? styles.navActive : ''}`
-                    }
+                    className={({ isActive }) => `${styles.navItem} ${isActive ? styles.navActive : ''}`}
                 >
                     {({ isActive }) => (
                         <>
@@ -143,15 +133,15 @@ export default function Sidebar() {
                     )}
                 </NavLink>
 
-                {(user.role !== 'student') && (
+                {/* ── INSTRUCTOR ── */}
+                {user.role === 'instructor' && (
                     <>
                         <div className={styles.divider} />
                         {isExpanded && <span className={styles.sectionLabel}>Manage</span>}
+
                         <NavLink
                             to="/teams"
-                            className={({ isActive }) =>
-                                `${styles.navItem} ${isActive ? styles.navActive : ''}`
-                            }
+                            className={({ isActive }) => `${styles.navItem} ${isActive ? styles.navActive : ''}`}
                         >
                             {({ isActive }) => (
                                 <>
@@ -164,18 +154,29 @@ export default function Sidebar() {
                                 </>
                             )}
                         </NavLink>
-                    </>
-                )}
 
-                {user.role === 'instructor' && (
-                    <>
+                        <NavLink
+                            to="/projects/new"
+                            className={({ isActive }) => `${styles.navItem} ${isActive ? styles.navActive : ''}`}
+                        >
+                            {({ isActive }) => (
+                                <>
+                                    {isActive && <div className={styles.curveTop} />}
+                                    <div className={`${styles.navIcon} ${isActive ? styles.navIconActive : ''}`}>
+                                        <FolderPlus size={17} />
+                                    </div>
+                                    {isExpanded && <span className={styles.navLabel}>New project</span>}
+                                    {isActive && <div className={styles.curveBottom} />}
+                                </>
+                            )}
+                        </NavLink>
+
                         <div className={styles.divider} />
                         {isExpanded && <span className={styles.sectionLabel}>Instructor</span>}
+
                         <NavLink
                             to="/instructor/overview"
-                            className={({ isActive }) =>
-                                `${styles.navItem} ${isActive ? styles.navActive : ''}`
-                            }
+                            className={({ isActive }) => `${styles.navItem} ${isActive ? styles.navActive : ''}`}
                         >
                             {({ isActive }) => (
                                 <>
@@ -188,11 +189,10 @@ export default function Sidebar() {
                                 </>
                             )}
                         </NavLink>
+
                         <NavLink
                             to="/instructor/manage"
-                            className={({ isActive }) =>
-                                `${styles.navItem} ${isActive ? styles.navActive : ''}`
-                            }
+                            className={({ isActive }) => `${styles.navItem} ${isActive ? styles.navActive : ''}`}
                         >
                             {({ isActive }) => (
                                 <>
@@ -225,13 +225,37 @@ export default function Sidebar() {
                     </>
                 )}
 
+                {/* ── LEADER ── */}
+                {user.role === 'leader' && (
+                    <>
+                        <div className={styles.divider} />
+                        {isExpanded && <span className={styles.sectionLabel}>Manage</span>}
+
+                        <NavLink
+                            to="/tasks/new"
+                            className={({ isActive }) => `${styles.navItem} ${isActive ? styles.navActive : ''}`}
+                        >
+                            {({ isActive }) => (
+                                <>
+                                    {isActive && <div className={styles.curveTop} />}
+                                    <div className={`${styles.navIcon} ${isActive ? styles.navIconActive : ''}`}>
+                                        <ClipboardList size={17} />
+                                    </div>
+                                    {isExpanded && <span className={styles.navLabel}>New task</span>}
+                                    {isActive && <div className={styles.curveBottom} />}
+                                </>
+                            )}
+                        </NavLink>
+                    </>
+                )}
+
+                {/* ── ACCOUNT (all roles) ── */}
                 <div className={styles.divider} />
                 {isExpanded && <span className={styles.sectionLabel}>Account</span>}
+
                 <NavLink
                     to="/profile"
-                    className={({ isActive }) =>
-                        `${styles.navItem} ${isActive ? styles.navActive : ''}`
-                    }
+                    className={({ isActive }) => `${styles.navItem} ${isActive ? styles.navActive : ''}`}
                 >
                     {({ isActive }) => (
                         <>
@@ -267,7 +291,6 @@ export default function Sidebar() {
                     {isExpanded && <span className={styles.signOutText}>Sign out</span>}
                 </button>
             </div>
-
         </aside>
     );
 }
