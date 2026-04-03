@@ -129,7 +129,7 @@ export default function TaskDetail() {
   }, [id, authLoading, user, navigate]);
 
   const teamId = task?.projects?.[0]?.team_id ?? null;
-  const canManage = teamId ? isLeaderOf(teamId) : false;
+  const canManage = user?.role === 'instructor' || (teamId ? isLeaderOf(teamId) : false);
 
   const canUpdateStatus = useMemo(() => {
     if (!user || !task) return false;

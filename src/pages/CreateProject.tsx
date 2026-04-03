@@ -18,6 +18,7 @@ export default function CreateProject() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -63,6 +64,7 @@ export default function CreateProject() {
 
     setIsCreating(true);
     setError(null);
+    setSuccess(null);
 
     try {
       const { data, error: createError } = await createProject({
@@ -75,7 +77,10 @@ export default function CreateProject() {
       if (createError) throw createError;
 
       if (data) {
-        navigate('/projects');
+        setSuccess('Project successfully created! Redirecting...');
+        setTimeout(() => {
+          navigate('/projects');
+        }, 1500);
       }
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : String(err);
@@ -185,7 +190,8 @@ export default function CreateProject() {
                     onMouseOut={(e) => {
                       if (formData.selectedTeamId !== t.id) e.currentTarget.style.background = 'transparent';
                     }}
-                    onClick={() => {
+                    onMouseDown={(e) => {
+                      e.preventDefault(); // Prevents input blur race condition
                       setFormData(p => ({ ...p, selectedTeamId: t.id }));
                       setTeamSearch(t.name);
                       setIsDropdownOpen(false);
@@ -200,6 +206,7 @@ export default function CreateProject() {
         </div>
 
         {error && <p className="form-error">{error}</p>}
+        {success && <p className="form-success" style={{ color: 'var(--color-green-dark)', padding: '10px', background: '#d1fae5', borderRadius: '4px', border: '1px solid #10b981', fontSize: '14px' }}>{success}</p>}
 
         <button
           type="submit"
