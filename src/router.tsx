@@ -14,6 +14,7 @@ import ProjectDetail from './pages/ProjectDetail';
 import TaskDetail from './pages/TaskDetail';
 import Projects from './pages/Projects';
 import CreateProject from './pages/CreateProject';
+import CreateTask from './pages/CreateTask';
 
 const router = createBrowserRouter([
     { path: '/', element: <Navigate to="/dashboard" replace /> },
@@ -31,8 +32,9 @@ const router = createBrowserRouter([
         children: [
             { path: '/dashboard', element: <Dashboard /> },
             { path: '/projects', element: <Projects /> },
-            { path: '/projects/create', element: <CreateProject /> },
+            { path: '/projects/new', element: <CreateProject /> },
             { path: '/projects/:id', element: <ProjectDetail /> },
+            { path: '/tasks/new', element: <CreateTask /> },
             { path: '/tasks/:id', element: <TaskDetail /> },
             { path: '/board', element: <Board /> },
             { path: '/teams', element: <TeamManagement /> },

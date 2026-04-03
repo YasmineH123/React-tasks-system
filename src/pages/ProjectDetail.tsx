@@ -105,7 +105,7 @@ export default function ProjectDetail() {
       const taskCards: TaskCard[] = safeTaskRows.map(t => ({
         id: t.id,
         title: t.title,
-        status: t.status === 'review' ? 'in_progress' : t.status,
+        status: t.status,
         assigneeName: t.assigned_to ? assigneeMap.get(t.assigned_to) ?? 'Unknown' : 'Unassigned',
       }));
 
@@ -177,7 +177,12 @@ export default function ProjectDetail() {
 
       {canManage && (
         <div className={styles.actionRow}>
-          <Link to={`/projects/${project.id}/tasks/new`} className="btn btn-primary">New task</Link>
+          <Link
+            to={`/tasks/new?project=${project.id}&name=${encodeURIComponent(project.name)}`}
+            className="btn btn-primary"
+          >
+            New task
+          </Link>
         </div>
       )}
 
