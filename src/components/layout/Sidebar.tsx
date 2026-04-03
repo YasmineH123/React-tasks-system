@@ -11,7 +11,7 @@ import { useProjects } from '../../hooks/useProjects';
 import styles from '../../styles/Sidebar.module.css';
 
 export default function Sidebar() {
-    const { user } = useAuthContext();
+    const { user, isLeaderOfAny } = useAuthContext();
     const navigate = useNavigate();
     const location = useLocation();
     const projects = useProjects(user?.id ?? '');
@@ -55,7 +55,6 @@ export default function Sidebar() {
             <nav className={styles.nav}>
                 {isExpanded && <span className={styles.sectionLabel}>Main</span>}
 
-                {/* Dashboard */}
                 <NavLink
                     to="/dashboard"
                     className={({ isActive }) => `${styles.navItem} ${isActive ? styles.navActive : ''}`}
@@ -72,7 +71,6 @@ export default function Sidebar() {
                     )}
                 </NavLink>
 
-                {/* Projects — collapsible */}
                 <div
                     className={`${styles.navItem} ${isProjectsActive ? styles.navActive : ''}`}
                     onClick={() => setProjectsOpen(v => !v)}
@@ -116,7 +114,6 @@ export default function Sidebar() {
                     </div>
                 )}
 
-                {/* Board */}
                 <NavLink
                     to="/board"
                     className={({ isActive }) => `${styles.navItem} ${isActive ? styles.navActive : ''}`}
@@ -133,7 +130,6 @@ export default function Sidebar() {
                     )}
                 </NavLink>
 
-                {/* ── INSTRUCTOR ── */}
                 {user.role === 'instructor' && (
                     <>
                         <div className={styles.divider} />
@@ -205,28 +201,10 @@ export default function Sidebar() {
                                 </>
                             )}
                         </NavLink>
-                        <NavLink
-                            to="/projects/create"
-                            className={({ isActive }) =>
-                                `${styles.navItem} ${isActive ? styles.navActive : ''}`
-                            }
-                        >
-                            {({ isActive }) => (
-                                <>
-                                    {isActive && <div className={styles.curveTop} />}
-                                    <div className={`${styles.navIcon} ${isActive ? styles.navIconActive : ''}`}>
-                                        <FolderPlus size={17} />
-                                    </div>
-                                    {isExpanded && <span className={styles.navLabel}>Create Project</span>}
-                                    {isActive && <div className={styles.curveBottom} />}
-                                </>
-                            )}
-                        </NavLink>
                     </>
                 )}
 
-                {/* ── LEADER ── */}
-                {user.role === 'leader' && (
+                {isLeaderOfAny && user.role !== 'instructor' && (
                     <>
                         <div className={styles.divider} />
                         {isExpanded && <span className={styles.sectionLabel}>Manage</span>}
@@ -249,7 +227,6 @@ export default function Sidebar() {
                     </>
                 )}
 
-                {/* ── ACCOUNT (all roles) ── */}
                 <div className={styles.divider} />
                 {isExpanded && <span className={styles.sectionLabel}>Account</span>}
 

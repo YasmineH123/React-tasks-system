@@ -2,10 +2,19 @@ import { supabase } from '../lib/supabaseClient';
 
 export async function fetchLeaderTeams(userId: string) {
     const { data, error } = await supabase
-        .from('teams')
-        .select('id, name')
-        .eq('created_by', userId);
-    return { data, error };
+        .from('team_members')
+        .select('team_id, teams(id, name)')
+        .eq('user_id', userId)
+        .eq('team_role', 'leader');
+
+    if (error || !data) return { data: [], error };
+
+    const teams = data.map((m: any) => ({
+        id: m.teams?.id ?? m.team_id,
+        name: m.teams?.name ?? null,
+    }));
+
+    return { data: teams, error: null };
 }
 
 export async function fetchLeaderProjects(userId: string) {

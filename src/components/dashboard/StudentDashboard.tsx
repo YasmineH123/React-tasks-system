@@ -37,9 +37,7 @@ export default function StudentDashboard({ user }: Props) {
         );
     }
 
-    if (error) {
-        return <div className={styles.error}>{error}</div>;
-    }
+    if (error) return <div className={styles.error}>{error}</div>;
 
     return (
         <div className={styles.page}>
@@ -73,11 +71,18 @@ export default function StudentDashboard({ user }: Props) {
                 </div>
             </div>
 
-            <GreetingBanner name={user.full_name} statValue={dueThisWeek.length} statLabel="Due this week" subMessage={
-                <>         You have <strong>{dueThisWeek.length} task{dueThisWeek.length !== 1 ? 's' : ''} due this week</strong>.
-                    {dueThisWeek.length > 0 ? " Stay focused — you're doing great." : ' Nothing urgent. Keep it up!'}     </>}
+            <GreetingBanner
+                name={user.full_name}
+                statValue={dueThisWeek.length}
+                statLabel="Due this week"
+                subMessage={
+                    <>
+                        You have <strong>{dueThisWeek.length} task{dueThisWeek.length !== 1 ? 's' : ''} due this week</strong>.
+                        {dueThisWeek.length > 0 ? " Stay focused — you're doing great." : ' Nothing urgent. Keep it up!'}
+                    </>
+                }
             />
-            
+
             <div className={styles.statsRow}>
                 <StatCard icon={ClipboardList} value={tasks.length} label="Assigned tasks" variant="purple" />
                 <StatCard icon={CheckCircle} value={completedCount} label="Completed" variant="blue" />
@@ -108,7 +113,7 @@ export default function StudentDashboard({ user }: Props) {
                                 <span className={styles.qaLabel}>View my tasks</span>
                                 <ArrowRight size={14} className={styles.qaArrow} />
                             </button>
-                            <button className={styles.qaItem} onClick={() => navigate('/board')}>
+                            <button className={styles.qaItem} onClick={() => navigate('/projects')}>
                                 <div className={styles.qaIcon} style={{ background: 'rgba(62,213,152,0.12)', color: '#1a7a52' }}>
                                     <FolderOpen size={16} />
                                 </div>
@@ -128,7 +133,7 @@ export default function StudentDashboard({ user }: Props) {
                     <div className={styles.card} style={{ flex: 1 }}>
                         <div className={styles.cardHeader} style={{ marginBottom: 12 }}>
                             <span className={styles.cardTitle}>Project progress</span>
-                            <button className={styles.cardLink} onClick={() => navigate('/board')}>
+                            <button className={styles.cardLink} onClick={() => navigate('/projects')}>
                                 View all <ArrowRight size={13} />
                             </button>
                         </div>

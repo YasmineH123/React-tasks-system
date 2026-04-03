@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Bell, ClipboardList, CheckCircle, Clock, Users,
-    Plus, FolderOpen, LayoutGrid, UserPlus, ArrowRight,
+    Plus, FolderOpen, LayoutGrid, ArrowRight,
 } from 'lucide-react';
 import type { AppUser } from '../../types/auth';
 import { useLeaderDashboard } from '../../hooks/useLeaderDashboard';
@@ -13,18 +13,16 @@ import NotificationList from './NotificationList';
 import UserChip from './UserChip';
 import MemberActivityTable from './MemberActivityTable';
 import RecentActivityFeed from './RecentActivityFeed';
-import styles from '../../styles/LeaderDashboard.module.css';
 import DeadlineCalendar from './DeadlineCalendar';
+import styles from '../../styles/LeaderDashboard.module.css';
 
 interface Props { user: AppUser; }
 
 export default function LeaderDashboard({ user }: Props) {
-
     const navigate = useNavigate();
     const {
         projects, teams, memberActivity, recentActivity,
-        calendarTasks,  // add this
-        notifications, unreadCount,
+        calendarTasks, notifications, unreadCount,
         totalTasks, completedCount, inProgressCount,
         overdueTasks, loading, error,
         readNotification, readAll,
@@ -77,14 +75,18 @@ export default function LeaderDashboard({ user }: Props) {
                 </div>
             </div>
 
-            <GreetingBanner name={user.full_name} statValue={overdueTasks.length} statLabel="Overdue tasks" subMessage={
-                <>
-                    Managing <strong>{projects.length} project{projects.length !== 1 ? 's' : ''}</strong> across <strong>{teams.length} team{teams.length !== 1 ? 's' : ''}</strong>.
-                    {overdueTasks.length > 0
-                        ? <> You have <strong>{overdueTasks.length} overdue task{overdueTasks.length !== 1 ? 's' : ''}</strong> that need attention.</>
-                        : ' Everything is on track.'}
-                </>
-            }
+            <GreetingBanner
+                name={user.full_name}
+                statValue={overdueTasks.length}
+                statLabel="Overdue tasks"
+                subMessage={
+                    <>
+                        Managing <strong>{projects.length} project{projects.length !== 1 ? 's' : ''}</strong> across <strong>{teams.length} team{teams.length !== 1 ? 's' : ''}</strong>.
+                        {overdueTasks.length > 0
+                            ? <> You have <strong>{overdueTasks.length} overdue task{overdueTasks.length !== 1 ? 's' : ''}</strong> that need attention.</>
+                            : ' Everything is on track.'}
+                    </>
+                }
             />
 
             <div className={styles.statsRow}>
@@ -95,7 +97,7 @@ export default function LeaderDashboard({ user }: Props) {
             </div>
 
             <div className={styles.actionsRow}>
-                <button className={styles.qaBtn} onClick={() => navigate('/projects')}>
+                <button className={styles.qaBtn} onClick={() => navigate('/tasks/new')}>
                     <div className={styles.qaIcon} style={{ background: 'rgba(62,213,152,0.12)', color: '#1a7a52' }}>
                         <Plus size={16} />
                     </div>
@@ -109,8 +111,8 @@ export default function LeaderDashboard({ user }: Props) {
                         <FolderOpen size={16} />
                     </div>
                     <div className={styles.qaText}>
-                        <span className={styles.qaLabel}>New project</span>
-                        <span className={styles.qaSub}>Start something new</span>
+                        <span className={styles.qaLabel}>View projects</span>
+                        <span className={styles.qaSub}>Browse all projects</span>
                     </div>
                 </button>
                 <button className={styles.qaBtn} onClick={() => navigate('/board')}>
@@ -120,15 +122,6 @@ export default function LeaderDashboard({ user }: Props) {
                     <div className={styles.qaText}>
                         <span className={styles.qaLabel}>Open board</span>
                         <span className={styles.qaSub}>View all tasks</span>
-                    </div>
-                </button>
-                <button className={styles.qaBtn} onClick={() => navigate('/teams')}>
-                    <div className={styles.qaIcon} style={{ background: 'rgba(245,158,11,0.1)', color: '#92400E' }}>
-                        <UserPlus size={16} />
-                    </div>
-                    <div className={styles.qaText}>
-                        <span className={styles.qaLabel}>Manage team</span>
-                        <span className={styles.qaSub}>Add or remove members</span>
                     </div>
                 </button>
             </div>
@@ -147,9 +140,7 @@ export default function LeaderDashboard({ user }: Props) {
                         );
                         return (
                             <div key={task.id} className={styles.overdueItem}>
-                                <div>
-                                    <p className={styles.overdueTaskTitle}>{task.title}</p>
-                                </div>
+                                <p className={styles.overdueTaskTitle}>{task.title}</p>
                                 <span className={styles.overdueBadge}>
                                     {daysOverdue} day{daysOverdue !== 1 ? 's' : ''} overdue
                                 </span>
@@ -182,7 +173,7 @@ export default function LeaderDashboard({ user }: Props) {
                 </div>
             </div>
 
-            <div className={styles.card}>
+            <div className={styles.card} style={{ marginBottom: 16 }}>
                 <div className={styles.cardHeader}>
                     <span className={styles.cardTitle}>Team member activity</span>
                 </div>
@@ -195,6 +186,7 @@ export default function LeaderDashboard({ user }: Props) {
                 </div>
                 <DeadlineCalendar tasks={calendarTasks} />
             </div>
+
         </div>
     );
 }

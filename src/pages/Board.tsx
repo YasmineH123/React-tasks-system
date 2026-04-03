@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { useAuthContext } from '../context/AuthContext';
+import { FolderOpen, User, Clock, AlertCircle } from 'lucide-react';
 import type { TaskStatus } from '../types/task';
 import styles from '../styles/Board.module.css';
 
@@ -20,10 +21,7 @@ interface TaskWithDetails {
 
 type FilterKey = 'all' | 'assigned_to_me' | 'assigned_to_others';
 
-const STATUS_CONFIG: Record<
-    TaskStatus,
-    { bg: string; border: string; dot: string; label: string; hoverBorder: string }
-> = {
+const STATUS_CONFIG: Record<TaskStatus, { bg: string; border: string; dot: string; label: string; hoverBorder: string }> = {
     todo: {
         bg: '#F5F3FF',
         border: '#9B6DE3',
@@ -70,7 +68,6 @@ export default function Board() {
                     .eq('user_id', user.id);
 
                 if (memberError || !memberRows?.length) {
-                    setError('Unable to load your teams.');
                     setTasks([]);
                     setIsLoading(false);
                     return;
@@ -84,7 +81,6 @@ export default function Board() {
                     .in('team_id', teamIds);
 
                 if (projectsError || !projectsData?.length) {
-                    setError('Unable to load projects.');
                     setTasks([]);
                     setIsLoading(false);
                     return;
@@ -100,7 +96,6 @@ export default function Board() {
 
                 if (tasksError) {
                     setError('Unable to load tasks.');
-                    setTasks([]);
                     setIsLoading(false);
                     return;
                 }
@@ -111,12 +106,11 @@ export default function Board() {
 
                 let usersMap = new Map<string, string>();
                 if (assigneeIds.length > 0) {
-                    const { data: usersData, error: usersError } = await supabase
+                    const { data: usersData } = await supabase
                         .from('users')
                         .select('id, full_name')
                         .in('id', assigneeIds);
-
-                    if (!usersError && usersData) {
+                    if (usersData) {
                         usersMap = new Map(usersData.map((u: any) => [u.id, u.full_name || u.id]));
                     }
                 }
@@ -128,9 +122,9 @@ export default function Board() {
                 }));
 
                 setTasks(enrichedTasks);
-                setIsLoading(false);
-            } catch (err) {
+            } catch {
                 setError('Unexpected error loading tasks.');
+            } finally {
                 setIsLoading(false);
             }
         }
@@ -140,20 +134,13 @@ export default function Board() {
 
     const filteredTasks = useMemo(() => {
         if (filterType === 'assigned_to_me') return tasks.filter(t => t.assigned_to === user?.id);
-        if (filterType === 'assigned_to_others')
-            return tasks.filter(t => t.assigned_to && t.assigned_to !== user?.id);
+        if (filterType === 'assigned_to_others') return tasks.filter(t => t.assigned_to && t.assigned_to !== user?.id);
         return tasks;
     }, [tasks, filterType, user?.id]);
 
     const tasksByStatus = useMemo(() => {
-        const grouped: Record<TaskStatus, TaskWithDetails[]> = {
-            todo: [],
-            in_progress: [],
-            done: [],
-        };
-        filteredTasks.forEach(task => {
-            grouped[task.status]?.push(task);
-        });
+        const grouped: Record<TaskStatus, TaskWithDetails[]> = { todo: [], in_progress: [], done: [] };
+        filteredTasks.forEach(task => { grouped[task.status]?.push(task); });
         return grouped;
     }, [filteredTasks]);
 
@@ -179,22 +166,13 @@ export default function Board() {
     }
 
     const filterOptions: { key: FilterKey; label: string; count: number }[] = [
-        { key: 'all', label: 'All Tasks', count: filteredTasks.length },
-        {
-            key: 'assigned_to_me',
-            label: 'Assigned to Me',
-            count: tasks.filter(t => t.assigned_to === user?.id).length,
-        },
-        {
-            key: 'assigned_to_others',
-            label: 'Assigned to Others',
-            count: tasks.filter(t => t.assigned_to && t.assigned_to !== user?.id).length,
-        },
+        { key: 'all', label: 'All tasks', count: tasks.length },
+        { key: 'assigned_to_me', label: 'Assigned to me', count: tasks.filter(t => t.assigned_to === user?.id).length },
+        { key: 'assigned_to_others', label: 'Assigned to others', count: tasks.filter(t => t.assigned_to && t.assigned_to !== user?.id).length },
     ];
 
     return (
         <div className={styles.container}>
-            {/* Header */}
             <div className={styles.header}>
                 <h1 className={styles.headerTitle}>Board</h1>
                 <p className={styles.headerSubtitle}>Manage tasks across your projects</p>
@@ -202,53 +180,37 @@ export default function Board() {
 
             {error && <div className="form-error">{error}</div>}
 
-            {/* Quick Stats */}
             <div className={styles.statsGrid}>
                 <div className={styles.statCard}>
-                    <div className={styles.statLabel}>Total Tasks</div>
-                    <div className={`${styles.statValue} ${styles.statValuePrimary}`}>
-                        {progressStats.total}
-                    </div>
+                    <div className={styles.statLabel}>Total tasks</div>
+                    <div className={`${styles.statValue} ${styles.statValuePrimary}`}>{progressStats.total}</div>
                 </div>
                 <div className={styles.statCard}>
-                    <div className={styles.statLabel}>In Progress</div>
-                    <div className={`${styles.statValue} ${styles.statValueAmber}`}>
-                        {progressStats.inProgress}
-                    </div>
+                    <div className={styles.statLabel}>In progress</div>
+                    <div className={`${styles.statValue} ${styles.statValueAmber}`}>{progressStats.inProgress}</div>
                 </div>
                 <div className={styles.statCard}>
                     <div className={styles.statLabel}>Completed</div>
-                    <div className={`${styles.statValue} ${styles.statValueGreen}`}>
-                        {progressStats.completed}
-                    </div>
+                    <div className={`${styles.statValue} ${styles.statValueGreen}`}>{progressStats.completed}</div>
                 </div>
                 <div className={styles.statCard}>
                     <div className={styles.statLabel}>Progress</div>
-                    <div className={`${styles.statValue} ${styles.statValuePrimary}`}>
-                        {progressStats.percentage}%
-                    </div>
+                    <div className={`${styles.statValue} ${styles.statValuePrimary}`}>{progressStats.percentage}%</div>
                 </div>
             </div>
 
-            {/* Progress Bar */}
             <div className={styles.progressBarWrapper}>
                 <div className={styles.progressBarTrack}>
-                    <div
-                        className={styles.progressBarFill}
-                        style={{ width: `${progressStats.percentage}%` }}
-                    />
+                    <div className={styles.progressBarFill} style={{ width: `${progressStats.percentage}%` }} />
                 </div>
             </div>
 
-            {/* Filter Buttons */}
             <div className={styles.filterRow}>
                 {filterOptions.map(filter => (
                     <button
                         key={filter.key}
                         onClick={() => setFilterType(filter.key)}
-                        className={`${styles.filterBtn} ${
-                            filterType === filter.key ? styles.filterBtnActive : ''
-                        }`}
+                        className={`${styles.filterBtn} ${filterType === filter.key ? styles.filterBtnActive : ''}`}
                     >
                         {filter.label}
                         <span className={styles.filterCount}>({filter.count})</span>
@@ -256,7 +218,6 @@ export default function Board() {
                 ))}
             </div>
 
-            {/* Kanban Columns */}
             <div className={styles.kanbanGrid}>
                 {(['todo', 'in_progress', 'done'] as TaskStatus[]).map(status => {
                     const statusTasks = tasksByStatus[status];
@@ -264,33 +225,20 @@ export default function Board() {
 
                     return (
                         <div key={status}>
-                            {/* Column Header */}
-                            <div
-                                className={styles.columnHeader}
-                                style={{ borderBottom: `2px solid ${cfg.border}` }}
-                            >
-                                <span
-                                    className={styles.columnDot}
-                                    style={{ backgroundColor: cfg.dot }}
-                                />
+                            <div className={styles.columnHeader} style={{ borderBottom: `2px solid ${cfg.border}` }}>
+                                <span className={styles.columnDot} style={{ backgroundColor: cfg.dot }} />
                                 <h3 className={styles.columnTitle}>{cfg.label}</h3>
                                 <span
                                     className={styles.columnBadge}
-                                    style={{
-                                        background: cfg.bg,
-                                        borderColor: cfg.border,
-                                        color: cfg.dot,
-                                    }}
+                                    style={{ background: cfg.bg, borderColor: cfg.border, color: cfg.dot }}
                                 >
                                     {statusTasks.length}
                                 </span>
                             </div>
 
-                            {/* Task Cards */}
                             <div className={styles.cardList}>
                                 {statusTasks.length === 0 ? (
                                     <div className={styles.emptyColumn}>
-                                        <div className={styles.emptyColumnIcon}>→</div>
                                         <div>No tasks yet</div>
                                     </div>
                                 ) : (
@@ -299,54 +247,37 @@ export default function Board() {
                                             key={task.id}
                                             onClick={() => navigate(`/tasks/${task.id}`)}
                                             className={styles.taskCard}
-                                            style={{
-                                                background: cfg.bg,
-                                                borderColor: cfg.border,
-                                            }}
-                                            onMouseOver={e => {
-                                                (e.currentTarget as HTMLElement).style.borderColor =
-                                                    cfg.hoverBorder;
-                                            }}
-                                            onMouseOut={e => {
-                                                (e.currentTarget as HTMLElement).style.borderColor =
-                                                    cfg.border;
-                                            }}
+                                            style={{ background: cfg.bg, borderColor: cfg.border }}
+                                            onMouseOver={e => { (e.currentTarget as HTMLElement).style.borderColor = cfg.hoverBorder; }}
+                                            onMouseOut={e => { (e.currentTarget as HTMLElement).style.borderColor = cfg.border; }}
                                         >
                                             <div className={styles.taskTitle}>{task.title}</div>
 
                                             {task.description && (
-                                                <div className={styles.taskDescription}>
-                                                    {task.description}
-                                                </div>
+                                                <div className={styles.taskDescription}>{task.description}</div>
                                             )}
 
                                             <div className={styles.taskMeta}>
                                                 <div className={styles.taskProject}>
-                                                    📁 {task.project_name}
+                                                    <FolderOpen size={12} />
+                                                    {task.project_name}
                                                 </div>
                                                 <div className={styles.taskMetaRow}>
                                                     {task.assignee_name ? (
                                                         <div className={styles.taskAssignee}>
-                                                            👤 {task.assignee_name}
+                                                            <User size={12} />
+                                                            {task.assignee_name}
                                                         </div>
                                                     ) : (
-                                                        <div className={styles.taskUnassigned}>
-                                                            Unassigned
-                                                        </div>
+                                                        <div className={styles.taskUnassigned}>Unassigned</div>
                                                     )}
                                                     {task.due_date && (
-                                                        <div
-                                                            className={
-                                                                isOverdue(task.due_date)
-                                                                    ? styles.taskDueDateOverdue
-                                                                    : styles.taskDueDate
+                                                        <div className={isOverdue(task.due_date) ? styles.taskDueDateOverdue : styles.taskDueDate}>
+                                                            {isOverdue(task.due_date)
+                                                                ? <AlertCircle size={12} />
+                                                                : <Clock size={12} />
                                                             }
-                                                        >
-                                                            {isOverdue(task.due_date) ? '⚠️ ' : '📅 '}
-                                                            {new Date(task.due_date).toLocaleDateString(
-                                                                'en-US',
-                                                                { month: 'short', day: 'numeric' }
-                                                            )}
+                                                            {new Date(task.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                                                         </div>
                                                     )}
                                                 </div>

@@ -14,12 +14,8 @@ export function useAccountRequest() {
 
         const { error: sbError } = await submitAccountRequest(values);
 
-        if (sbError) {
-            console.error('Supabase error:', sbError.message, sbError.code, sbError.details);
-            setError('Failed to submit request. Please try again.');
-        } else {
-            setSuccess(true);
-        }
+        if (sbError) setError('Failed to submit request. Please try again.');
+        else setSuccess(true);
 
         setLoading(false);
     }

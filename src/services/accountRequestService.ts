@@ -5,7 +5,6 @@ export async function submitAccountRequest(values: AccountRequestFormValues) {
     const { error } = await supabase
         .from('account_requests')
         .insert(values);
-
     return { error };
 }
 
@@ -14,7 +13,6 @@ export async function fetchAllAccountRequests() {
         .from('account_requests')
         .select('*')
         .order('created_at', { ascending: false });
-
     return { data: data as AccountRequest[] | null, error };
 }
 
@@ -39,16 +37,8 @@ export async function approveAccountRequest(id: string) {
     );
 
     const data = await response.json();
-    console.log('Direct fetch response:', response.status, data);
-
-    if (!response.ok) {
-        return { error: new Error(data?.error ?? 'Function call failed') };
-    }
-
-    if (data?.error) {
-        return { error: new Error(data.error) };
-    }
-
+    if (!response.ok) return { error: new Error(data?.error ?? 'Function call failed') };
+    if (data?.error) return { error: new Error(data.error) };
     return { error: null, data };
 }
 
@@ -57,7 +47,6 @@ export async function rejectAccountRequest(id: string) {
         .from('account_requests')
         .update({ status: 'rejected' })
         .eq('id', id);
-
     return { error };
 }
 

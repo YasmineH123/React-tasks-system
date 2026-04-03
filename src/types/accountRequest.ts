@@ -1,5 +1,5 @@
 export type RequestStatus = 'pending' | 'approved' | 'rejected';
-export type RequestRole   = 'student' | 'leader';
+export type RequestRole   = 'student';
 
 export interface AccountRequest {
   id: string;

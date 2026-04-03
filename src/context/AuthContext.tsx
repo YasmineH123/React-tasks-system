@@ -1,15 +1,21 @@
 import { createContext, useContext } from 'react';
 import type { ReactNode } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import type { AppUser } from '../types/auth';
+import type { AppUser, TeamMembership } from '../types/auth';
 
 interface AuthContextType {
   user: AppUser | null;
+  memberships: TeamMembership[];
+  isLeaderOfAny: boolean;
+  isLeaderOf: (teamId: string) => boolean;
   loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
+  memberships: [],
+  isLeaderOfAny: false,
+  isLeaderOf: () => false,
   loading: true,
 });
 
@@ -22,5 +28,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// call this 
 export const useAuthContext = () => useContext(AuthContext);

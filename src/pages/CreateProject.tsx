@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { useAuthContext } from '../context/AuthContext';
-import { createProjectWithStudents } from '../services/projectService';
+import { createProject } from '../services/projectService';
 
 interface Student {
   id: string;
@@ -10,11 +10,17 @@ interface Student {
   email: string;
 }
 
+interface Team {
+  id: string;
+  name: string;
+}
+
 export default function CreateProject() {
   const navigate = useNavigate();
   const { user } = useAuthContext();
 
   const [students, setStudents] = useState<Student[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
   const [studentSearch, setStudentSearch] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,46 +29,33 @@ export default function CreateProject() {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    selectedStudents: [] as string[],
+    selectedTeamId: '',
+    selectedLeaderId: '',
   });
 
   useEffect(() => {
     async function loadData() {
-      if (!user) return;
-      if (user.role !== 'instructor') {
-          setIsLoading(false);
-          return;
+      if (!user || user.role !== 'instructor') {
+        setIsLoading(false);
+        return;
       }
       try {
-        const { data: allStudents, error: studentsError } = await supabase
-          .from('users')
-          .select('id, full_name, email')
-          .in('role', ['student', 'leader']);
-
-        if (studentsError) throw studentsError;
-        setStudents((allStudents as Student[]) || []);
+        const [studentsRes, teamsRes] = await Promise.all([
+          supabase.from('users').select('id, full_name, email').eq('role', 'student'),
+          supabase.from('teams').select('id, name'),
+        ]);
+        if (studentsRes.error) throw studentsRes.error;
+        if (teamsRes.error) throw teamsRes.error;
+        setStudents((studentsRes.data as Student[]) ?? []);
+        setTeams((teamsRes.data as Team[]) ?? []);
       } catch (err) {
-        console.error('Error loading data:', err);
         setError('Failed to load data');
       } finally {
         setIsLoading(false);
       }
     }
-
     loadData();
   }, [user]);
-
-  function handleStudentToggle(studentId: string) {
-    setFormData(prev => {
-      const isSelected = prev.selectedStudents.includes(studentId);
-      return {
-        ...prev,
-        selectedStudents: isSelected
-          ? prev.selectedStudents.filter(id => id !== studentId)
-          : [...prev.selectedStudents, studentId],
-      };
-    });
-  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -71,9 +64,12 @@ export default function CreateProject() {
       setError('Only instructors can create projects');
       return;
     }
-
     if (!formData.name.trim()) {
       setError('Project name is required');
+      return;
+    }
+    if (!formData.selectedTeamId) {
+      setError('Please select a team');
       return;
     }
 
@@ -81,199 +77,130 @@ export default function CreateProject() {
     setError(null);
 
     try {
-      const { data, error: createError } = await createProjectWithStudents({
+      const { data, error: createError } = await createProject({
         name: formData.name,
         description: formData.description || undefined,
+        teamId: formData.selectedTeamId,
         createdBy: user.id,
-        studentIds: formData.selectedStudents,
       });
 
       if (createError) throw createError;
 
+      if (formData.selectedLeaderId && data) {
+        await supabase
+          .from('team_members')
+          .update({ team_role: 'leader' })
+          .eq('team_id', formData.selectedTeamId)
+          .eq('user_id', formData.selectedLeaderId);
+      }
+
       if (data) {
-        alert('Project created successfully!');
         navigate('/projects');
       }
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : String(err);
-      console.error('Error creating project:', errorMsg);
       setError(`Failed to create project: ${errorMsg}`);
     } finally {
       setIsCreating(false);
     }
   }
 
-  const normalizedSearch = studentSearch.trim().toLowerCase();
-  const filteredStudents = students.filter(student => {
-    if (!normalizedSearch) return true;
-    return (
-      student.full_name?.toLowerCase().includes(normalizedSearch) ||
-      student.email.toLowerCase().includes(normalizedSearch)
-    );
-  });
+  const teamMembers = formData.selectedTeamId
+    ? students.filter(s =>
+      s.full_name?.toLowerCase().includes(studentSearch.toLowerCase()) ||
+      s.email.toLowerCase().includes(studentSearch.toLowerCase())
+    )
+    : [];
 
   if (isLoading) {
-    return (
-      <div style={{ padding: 32, textAlign: 'center' }}>
-        <div>Loading...</div>
-      </div>
-    );
+    return <div style={{ padding: 32, textAlign: 'center' }}>Loading...</div>;
   }
 
   if (!user || user.role !== 'instructor') {
     return (
       <div style={{ padding: 32 }}>
-        <div style={{ color: '#EF4444', fontWeight: 500 }}>
-          Only instructors can access this page
-        </div>
+        <div style={{ color: '#EF4444', fontWeight: 500 }}>Only instructors can access this page</div>
       </div>
     );
   }
 
   return (
-    <div style={{ padding: 32, maxWidth: 800, margin: '0 auto' }}>
-      <div style={{ marginBottom: 32 }}>
-        <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>Create Project</h1>
-        <p style={{ fontSize: 14, color: '#666' }}>
-          Create a new project and assign students to it.
+    <div style={{ padding: 32, maxWidth: 640, margin: '0 auto' }}>
+      <div style={{ marginBottom: 28 }}>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700, marginBottom: 6 }}>
+          New project
+        </h1>
+        <p style={{ fontSize: 14, color: 'var(--color-text-secondary)' }}>
+          Create a project and assign it to an existing team.
         </p>
       </div>
 
-      <div style={{
-        padding: 24,
-        backgroundColor: '#F9FAFB',
-        borderRadius: 8,
-        border: '1px solid #E5E7EB',
-      }}>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <div>
-            <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
-              Project Name
-            </label>
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-              placeholder="Enter project name"
-              style={{
-                width: '100%',
-                padding: '8px 12px',
-                borderRadius: 4,
-                border: '1px solid #D1D5DB',
-                fontSize: 14,
-                fontFamily: 'inherit',
-              }}
-              required
-            />
-          </div>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <div className="form-field">
+          <label className="form-label">Project name</label>
+          <input
+            className="form-input"
+            type="text"
+            value={formData.name}
+            onChange={e => setFormData(p => ({ ...p, name: e.target.value }))}
+            placeholder="e.g. Collab System"
+            required
+          />
+        </div>
 
-          <div>
-            <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
-              Description (optional)
-            </label>
-            <textarea
-              value={formData.description}
-              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-              placeholder="Enter project description"
-              rows={3}
-              style={{
-                width: '100%',
-                padding: '8px 12px',
-                borderRadius: 4,
-                border: '1px solid #D1D5DB',
-                fontSize: 14,
-                fontFamily: 'inherit',
-                resize: 'vertical',
-              }}
-            />
-          </div>
+        <div className="form-field">
+          <label className="form-label">Description <span style={{ fontWeight: 400, color: 'var(--color-text-secondary)' }}>(optional)</span></label>
+          <textarea
+            className="form-input"
+            value={formData.description}
+            onChange={e => setFormData(p => ({ ...p, description: e.target.value }))}
+            placeholder="What is this project about?"
+            rows={3}
+            style={{ resize: 'vertical', fontFamily: 'var(--font-body)' }}
+          />
+        </div>
 
-          <div>
-            <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 8 }}>
-              Select Team Members ({formData.selectedStudents.length} selected)
-            </label>
-            <input
-              type="text"
-              value={studentSearch}
-              onChange={(e) => setStudentSearch(e.target.value)}
-              placeholder="Search by name or email"
-              style={{
-                width: '100%',
-                padding: '8px 10px',
-                marginBottom: 8,
-                borderRadius: 4,
-                border: '1px solid #D1D5DB',
-                fontSize: 13,
-              }}
-            />
-            <div style={{
-              maxHeight: '300px',
-              overflowY: 'auto',
-              border: '1px solid #D1D5DB',
-              borderRadius: 4,
-              padding: '8px',
-            }}>
-              {filteredStudents.length === 0 ? (
-                <div style={{ padding: '12px', color: '#666', fontSize: 13 }}>No matching members found.</div>
-              ) : (
-                filteredStudents.map(student => (
-                  <div
-                    key={student.id}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      padding: '8px',
-                      cursor: 'pointer',
-                      borderRadius: 4,
-                      backgroundColor: formData.selectedStudents.includes(student.id) ? '#E0D4F7' : 'transparent',
-                    }}
-                    onClick={() => handleStudentToggle(student.id)}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={formData.selectedStudents.includes(student.id)}
-                      onChange={() => handleStudentToggle(student.id)}
-                      style={{ marginRight: 8, cursor: 'pointer' }}
-                    />
-                    <div>
-                      <div style={{ fontSize: 13, fontWeight: 500 }}>
-                        {student.full_name || 'Unknown'}
-                      </div>
-                      <div style={{ fontSize: 12, color: '#666' }}>
-                        {student.email}
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-
-          {error && (
-            <div style={{ padding: 12, backgroundColor: '#FEE2E2', borderRadius: 4, color: '#DC2626', fontSize: 14 }}>
-              {error}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={isCreating || !formData.name.trim()}
-            style={{
-              padding: '10px 16px',
-              backgroundColor: '#6C3EB6',
-              color: 'white',
-              border: 'none',
-              borderRadius: 4,
-              fontSize: 14,
-              fontWeight: 600,
-              cursor: isCreating || !formData.name.trim() ? 'not-allowed' : 'pointer',
-              opacity: isCreating || !formData.name.trim() ? 0.6 : 1,
-            }}
+        <div className="form-field">
+          <label className="form-label">Assign to team</label>
+          <select
+            className="form-input"
+            value={formData.selectedTeamId}
+            onChange={e => setFormData(p => ({ ...p, selectedTeamId: e.target.value, selectedLeaderId: '' }))}
+            required
           >
-            {isCreating ? 'Creating...' : 'Create Project'}
-          </button>
-        </form>
-      </div>
+            <option value="">Select a team…</option>
+            {teams.map(t => (
+              <option key={t.id} value={t.id}>{t.name}</option>
+            ))}
+          </select>
+        </div>
+
+        {formData.selectedTeamId && (
+          <div className="form-field">
+            <label className="form-label">Designate team leader <span style={{ fontWeight: 400, color: 'var(--color-text-secondary)' }}>(optional)</span></label>
+            <select
+              className="form-input"
+              value={formData.selectedLeaderId}
+              onChange={e => setFormData(p => ({ ...p, selectedLeaderId: e.target.value }))}
+            >
+              <option value="">No leader yet…</option>
+              {students.map(s => (
+                <option key={s.id} value={s.id}>{s.full_name ?? s.email}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {error && <p className="form-error">{error}</p>}
+
+        <button
+          type="submit"
+          className="btn btn-primary btn-full btn-lg"
+          disabled={isCreating || !formData.name.trim() || !formData.selectedTeamId}
+        >
+          {isCreating ? 'Creating…' : 'Create project'}
+        </button>
+      </form>
     </div>
   );
 }

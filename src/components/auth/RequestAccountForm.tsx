@@ -76,20 +76,6 @@ export default function RequestAccountForm() {
             </div>
 
             <div className="form-field">
-                <label htmlFor="role" className="form-label">I am a</label>
-                <select
-                    id="role"
-                    name="role"
-                    className="form-input"
-                    value={values.role}
-                    onChange={handleChange}
-                >
-                    <option value="student">Student</option>
-                    <option value="leader">Team leader</option>
-                </select>
-            </div>
-
-            <div className="form-field">
                 <label htmlFor="message" className="form-label">
                     Message{' '}
                     <span style={{ color: 'var(--color-gray-soft)', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>
