@@ -16,6 +16,7 @@ export default function Sidebar() {
     const location = useLocation();
     const projects = useProjects(user?.id ?? '');
 
+
     const [hoverExpanded, setHoverExpanded] = useState(false);
     const [projectsOpen, setProjectsOpen] = useState(false);
 
@@ -33,7 +34,11 @@ export default function Sidebar() {
     if (!user) return null;
 
     const initials = getInitials(user.full_name);
-
+    const roleLabel = user.role === 'instructor'
+        ? 'Instructor'
+        : isLeaderOfAny
+            ? 'Student · Leader'
+            : 'Student';
     return (
         <aside
             className={`${styles.sidebar} ${!isExpanded ? styles.collapsed : ''}`}
@@ -258,7 +263,7 @@ export default function Sidebar() {
                     {isExpanded && (
                         <div className={styles.userInfo}>
                             <span className={styles.userName}>{user.full_name ?? user.email}</span>
-                            <span className={styles.userRole}>{user.role}</span>
+                            <span className={styles.userRole}>{roleLabel}</span>
                         </div>
                     )}
                 </div>
