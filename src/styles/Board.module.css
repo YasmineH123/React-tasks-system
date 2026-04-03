@@ -249,3 +249,23 @@
     color: #c53030;
     font-weight: 600;
 }
+
+.filterSelect {
+    padding: 10px 16px;
+    border-radius: var(--radius-md);
+    border: 1.5px solid var(--color-gray-soft);
+    background: var(--color-white);
+    color: var(--color-text-primary);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+    outline: none;
+}
+.filterSelect:hover {
+    background: #f9f8fb;
+}
+.filterSelect:focus {
+    border-color: var(--color-primary);
+}
+

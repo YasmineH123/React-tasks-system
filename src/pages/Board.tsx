@@ -36,6 +36,13 @@ const STATUS_CONFIG: Record<TaskStatus, { bg: string; border: string; dot: strin
         hoverBorder: '#D97706',
         label: 'In Progress',
     },
+    review: {
+        bg: '#EFF6FF',
+        border: '#3B82F6',
+        dot: '#2563EB',
+        hoverBorder: '#2563EB',
+        label: 'Review',
+    },
     done: {
         bg: '#F0FDF9',
         border: '#3ED598',
@@ -53,6 +60,8 @@ export default function Board() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [filterType, setFilterType] = useState<FilterKey>('all');
+    const [selectedProject, setSelectedProject] = useState<string>('all');
+    const [selectedStatus, setSelectedStatus] = useState<string>('all');
 
     useEffect(() => {
         async function loadTasks() {
@@ -62,32 +71,50 @@ export default function Board() {
             setError(null);
 
             try {
-                const { data: memberRows, error: memberError } = await supabase
-                    .from('team_members')
-                    .select('team_id')
-                    .eq('user_id', user.id);
+                let projectIds: string[] = [];
+                let projectMap = new Map<string, string>();
 
-                if (memberError || !memberRows?.length) {
-                    setTasks([]);
-                    setIsLoading(false);
-                    return;
+                if (user.role === 'instructor') {
+                    const { data: projectsData, error: projectsError } = await supabase
+                        .from('projects')
+                        .select('id, name');
+
+                    if (projectsError || !projectsData?.length) {
+                        setTasks([]);
+                        setIsLoading(false);
+                        return;
+                    }
+
+                    projectIds = projectsData.map((p: any) => p.id);
+                    projectMap = new Map(projectsData.map((p: any) => [p.id, p.name]));
+                } else {
+                    const { data: memberRows, error: memberError } = await supabase
+                        .from('team_members')
+                        .select('team_id')
+                        .eq('user_id', user.id);
+
+                    if (memberError || !memberRows?.length) {
+                        setTasks([]);
+                        setIsLoading(false);
+                        return;
+                    }
+
+                    const teamIds = memberRows.map(r => r.team_id);
+
+                    const { data: projectsData, error: projectsError } = await supabase
+                        .from('projects')
+                        .select('id, name')
+                        .in('team_id', teamIds);
+
+                    if (projectsError || !projectsData?.length) {
+                        setTasks([]);
+                        setIsLoading(false);
+                        return;
+                    }
+
+                    projectIds = projectsData.map((p: any) => p.id);
+                    projectMap = new Map(projectsData.map((p: any) => [p.id, p.name]));
                 }
-
-                const teamIds = memberRows.map(r => r.team_id);
-
-                const { data: projectsData, error: projectsError } = await supabase
-                    .from('projects')
-                    .select('id, name')
-                    .in('team_id', teamIds);
-
-                if (projectsError || !projectsData?.length) {
-                    setTasks([]);
-                    setIsLoading(false);
-                    return;
-                }
-
-                const projectIds = projectsData.map((p: any) => p.id);
-                const projectMap = new Map(projectsData.map((p: any) => [p.id, p.name]));
 
                 const { data: tasksData, error: tasksError } = await supabase
                     .from('tasks')
@@ -133,13 +160,24 @@ export default function Board() {
     }, [user]);
 
     const filteredTasks = useMemo(() => {
-        if (filterType === 'assigned_to_me') return tasks.filter(t => t.assigned_to === user?.id);
-        if (filterType === 'assigned_to_others') return tasks.filter(t => t.assigned_to && t.assigned_to !== user?.id);
-        return tasks;
-    }, [tasks, filterType, user?.id]);
+        let result = tasks;
+
+        if (filterType === 'assigned_to_me') result = result.filter(t => t.assigned_to === user?.id);
+        if (filterType === 'assigned_to_others') result = result.filter(t => t.assigned_to && t.assigned_to !== user?.id);
+        
+        if (selectedProject !== 'all') {
+            result = result.filter(t => t.project_id === selectedProject);
+        }
+
+        if (selectedStatus !== 'all') {
+            result = result.filter(t => t.status === selectedStatus);
+        }
+
+        return result;
+    }, [tasks, filterType, selectedProject, selectedStatus, user?.id]);
 
     const tasksByStatus = useMemo(() => {
-        const grouped: Record<TaskStatus, TaskWithDetails[]> = { todo: [], in_progress: [], done: [] };
+        const grouped: Record<TaskStatus, TaskWithDetails[]> = { todo: [], in_progress: [], review: [], done: [] };
         filteredTasks.forEach(task => { grouped[task.status]?.push(task); });
         return grouped;
     }, [filteredTasks]);
@@ -156,6 +194,12 @@ export default function Board() {
         if (!dueDate) return false;
         return new Date(dueDate) < new Date();
     };
+
+    const projectOptions = useMemo(() => {
+        const map = new Map<string, string>();
+        tasks.forEach(t => map.set(t.project_id, t.project_name));
+        return Array.from(map.entries()).map(([id, name]) => ({ id, name }));
+    }, [tasks]);
 
     if (isLoading) {
         return (
@@ -216,10 +260,33 @@ export default function Board() {
                         <span className={styles.filterCount}>({filter.count})</span>
                     </button>
                 ))}
+                
+                <select 
+                    className={styles.filterSelect}
+                    value={selectedProject}
+                    onChange={(e) => setSelectedProject(e.target.value)}
+                >
+                    <option value="all">All Projects</option>
+                    {projectOptions.map(p => (
+                        <option key={p.id} value={p.id}>{p.name}</option>
+                    ))}
+                </select>
+
+                <select 
+                    className={styles.filterSelect}
+                    value={selectedStatus}
+                    onChange={(e) => setSelectedStatus(e.target.value)}
+                >
+                    <option value="all">All Statuses</option>
+                    <option value="todo">To Do</option>
+                    <option value="in_progress">In Progress</option>
+                    <option value="review">Review</option>
+                    <option value="done">Done</option>
+                </select>
             </div>
 
             <div className={styles.kanbanGrid}>
-                {(['todo', 'in_progress', 'done'] as TaskStatus[]).map(status => {
+                {(['todo', 'in_progress', 'review', 'done'] as TaskStatus[]).map(status => {
                     const statusTasks = tasksByStatus[status];
                     const cfg = STATUS_CONFIG[status];
 

@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabaseClient';
 import { useAuthContext } from '../context/AuthContext';
 import styles from '../styles/ProjectDetail.module.css';
 
-type TaskStatus = 'todo' | 'in_progress' | 'done';
+type TaskStatus = 'todo' | 'in_progress' | 'review' | 'done';
 
 type ProjectRow = {
   id: string;
@@ -30,12 +30,14 @@ type TeamMemberCard = {
 const statusLabels: Record<TaskStatus, string> = {
   todo: 'Todo',
   in_progress: 'In Progress',
+  review: 'Review',
   done: 'Done',
 };
 
 const statusColors: Record<TaskStatus, string> = {
   todo: styles.todo,
   in_progress: styles.inProgress,
+  review: styles.review,
   done: styles.done,
 };
 
@@ -136,6 +138,7 @@ export default function ProjectDetail() {
   const columns = useMemo(() => ({
     todo: tasks.filter(t => t.status === 'todo'),
     in_progress: tasks.filter(t => t.status === 'in_progress'),
+    review: tasks.filter(t => t.status === 'review'),
     done: tasks.filter(t => t.status === 'done'),
   }), [tasks]);
 
@@ -188,7 +191,7 @@ export default function ProjectDetail() {
 
       <div className={styles.layout}>
         <div className={styles.board}>
-          {(['todo', 'in_progress', 'done'] as const).map(statusKey => (
+          {(['todo', 'in_progress', 'review', 'done'] as const).map(statusKey => (
             <div key={statusKey} className={styles.column}>
               <h3 className={styles.columnTitle}>
                 {statusLabels[statusKey]} ({columns[statusKey].length})

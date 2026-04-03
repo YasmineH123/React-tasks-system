@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabaseClient';
 import { useAuthContext } from '../context/AuthContext';
 import styles from '../styles/TaskDetail.module.css';
 
-type TaskStatus = 'todo' | 'in_progress' | 'done';
+type TaskStatus = 'todo' | 'in_progress' | 'review' | 'done';
 
 type TaskDetailRow = {
   id: string;
@@ -36,6 +36,7 @@ type CommentView = {
 const statusOptions: { value: TaskStatus; label: string }[] = [
   { value: 'todo', label: 'Todo' },
   { value: 'in_progress', label: 'In Progress' },
+  { value: 'review', label: 'Review' },
   { value: 'done', label: 'Done' },
 ];
 

@@ -30,6 +30,14 @@ const statusConfig: Record<TaskStatus, {
         dotBg: '#F59E0B',
         dotBorder: '#F59E0B',
     },
+    review: {
+        label: 'Review',
+        pillBg: 'rgba(59,130,246,0.1)',
+        pillColor: '#1E40AF',
+        cardBg: '#EFF6FF',
+        dotBg: '#3B82F6',
+        dotBorder: '#3B82F6',
+    },
     done: {
         label: 'Done',
         pillBg: 'rgba(62,213,152,0.12)',

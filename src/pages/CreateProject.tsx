@@ -4,12 +4,6 @@ import { supabase } from '../lib/supabaseClient';
 import { useAuthContext } from '../context/AuthContext';
 import { createProject } from '../services/projectService';
 
-interface Student {
-  id: string;
-  full_name: string | null;
-  email: string;
-}
-
 interface Team {
   id: string;
   name: string;
@@ -19,9 +13,9 @@ export default function CreateProject() {
   const navigate = useNavigate();
   const { user } = useAuthContext();
 
-  const [students, setStudents] = useState<Student[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
-  const [studentSearch, setStudentSearch] = useState('');
+  const [teamSearch, setTeamSearch] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
@@ -30,7 +24,6 @@ export default function CreateProject() {
     name: '',
     description: '',
     selectedTeamId: '',
-    selectedLeaderId: '',
   });
 
   useEffect(() => {
@@ -40,13 +33,8 @@ export default function CreateProject() {
         return;
       }
       try {
-        const [studentsRes, teamsRes] = await Promise.all([
-          supabase.from('users').select('id, full_name, email').eq('role', 'student'),
-          supabase.from('teams').select('id, name'),
-        ]);
-        if (studentsRes.error) throw studentsRes.error;
+        const teamsRes = await supabase.from('teams').select('id, name');
         if (teamsRes.error) throw teamsRes.error;
-        setStudents((studentsRes.data as Student[]) ?? []);
         setTeams((teamsRes.data as Team[]) ?? []);
       } catch (err) {
         setError('Failed to load data');
@@ -86,14 +74,6 @@ export default function CreateProject() {
 
       if (createError) throw createError;
 
-      if (formData.selectedLeaderId && data) {
-        await supabase
-          .from('team_members')
-          .update({ team_role: 'leader' })
-          .eq('team_id', formData.selectedTeamId)
-          .eq('user_id', formData.selectedLeaderId);
-      }
-
       if (data) {
         navigate('/projects');
       }
@@ -105,12 +85,6 @@ export default function CreateProject() {
     }
   }
 
-  const teamMembers = formData.selectedTeamId
-    ? students.filter(s =>
-      s.full_name?.toLowerCase().includes(studentSearch.toLowerCase()) ||
-      s.email.toLowerCase().includes(studentSearch.toLowerCase())
-    )
-    : [];
 
   if (isLoading) {
     return <div style={{ padding: 32, textAlign: 'center' }}>Loading...</div>;
@@ -123,6 +97,10 @@ export default function CreateProject() {
       </div>
     );
   }
+
+  const filteredTeams = teams.filter(t => 
+    t.name.toLowerCase().includes(teamSearch.toLowerCase())
+  );
 
   return (
     <div style={{ padding: 32, maxWidth: 640, margin: '0 auto' }}>
@@ -160,36 +138,66 @@ export default function CreateProject() {
           />
         </div>
 
-        <div className="form-field">
+        <div className="form-field" style={{ position: 'relative' }}>
           <label className="form-label">Assign to team</label>
-          <select
+          <input
+            type="text"
+            placeholder="Search and select a team..."
             className="form-input"
-            value={formData.selectedTeamId}
-            onChange={e => setFormData(p => ({ ...p, selectedTeamId: e.target.value, selectedLeaderId: '' }))}
+            value={teamSearch}
+            onFocus={() => setIsDropdownOpen(true)}
+            onBlur={() => setTimeout(() => setIsDropdownOpen(false), 200)}
+            onChange={(e) => {
+              setTeamSearch(e.target.value);
+              setIsDropdownOpen(true);
+              // Clear actual selected ID when user starts typing something new
+              if (formData.selectedTeamId) {
+                setFormData(p => ({ ...p, selectedTeamId: '' }));
+              }
+            }}
             required
-          >
-            <option value="">Select a team…</option>
-            {teams.map(t => (
-              <option key={t.id} value={t.id}>{t.name}</option>
-            ))}
-          </select>
+            autoComplete="off"
+            style={{ marginBottom: 0 }}
+          />
+          {isDropdownOpen && (
+            <div style={{
+              position: 'absolute', top: '100%', left: 0, right: 0,
+              background: '#fff', border: '1px solid var(--color-gray-soft)',
+              borderRadius: 'var(--radius-md)', zIndex: 10,
+              maxHeight: 200, overflowY: 'auto',
+              boxShadow: 'var(--shadow-md)',
+              marginTop: '4px'
+            }}>
+              {filteredTeams.length === 0 ? (
+                <div style={{ padding: '10px 14px', color: 'var(--color-text-secondary)', fontSize: 13 }}>
+                  No teams found
+                </div>
+              ) : (
+                filteredTeams.map(t => (
+                  <div
+                    key={t.id}
+                    style={{
+                      padding: '10px 14px', cursor: 'pointer', fontSize: 13,
+                      borderBottom: '1px solid var(--color-bg-solid)',
+                      background: formData.selectedTeamId === t.id ? 'var(--color-bg-solid)' : 'transparent',
+                    }}
+                    onMouseOver={(e) => (e.currentTarget.style.background = 'var(--color-bg-solid)')}
+                    onMouseOut={(e) => {
+                      if (formData.selectedTeamId !== t.id) e.currentTarget.style.background = 'transparent';
+                    }}
+                    onClick={() => {
+                      setFormData(p => ({ ...p, selectedTeamId: t.id }));
+                      setTeamSearch(t.name);
+                      setIsDropdownOpen(false);
+                    }}
+                  >
+                    {t.name}
+                  </div>
+                ))
+              )}
+            </div>
+          )}
         </div>
-
-        {formData.selectedTeamId && (
-          <div className="form-field">
-            <label className="form-label">Designate team leader <span style={{ fontWeight: 400, color: 'var(--color-text-secondary)' }}>(optional)</span></label>
-            <select
-              className="form-input"
-              value={formData.selectedLeaderId}
-              onChange={e => setFormData(p => ({ ...p, selectedLeaderId: e.target.value }))}
-            >
-              <option value="">No leader yet…</option>
-              {students.map(s => (
-                <option key={s.id} value={s.id}>{s.full_name ?? s.email}</option>
-              ))}
-            </select>
-          </div>
-        )}
 
         {error && <p className="form-error">{error}</p>}
 
