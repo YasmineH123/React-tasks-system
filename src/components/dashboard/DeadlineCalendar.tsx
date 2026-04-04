@@ -17,8 +17,7 @@ export default function DeadlineCalendar({ tasks }: Props) {
     const today = new Date();
     const [year, setYear] = useState(today.getFullYear());
     const [month, setMonth] = useState(today.getMonth());
-    const [tooltip, setTooltip] = useState<{ day: number; x: number; y: number } | null>(null);
-
+    const [tooltip, setTooltip] = useState<{ day: number } | null>(null);
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const firstDaySun = new Date(year, month, 1).getDay();
 
@@ -130,11 +129,7 @@ export default function DeadlineCalendar({ tasks }: Props) {
                                 key={day}
                                 className={`${styles.cell} ${hasTask ? styles.clickable : ''}`}
                                 onClick={() => handleDayClick(day)}
-                                onMouseEnter={e => {
-                                    if (!hasTask) return;
-                                    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-                                    setTooltip({ day, x: rect.left, y: rect.bottom });
-                                }}
+                                onMouseEnter={() => hasTask && setTooltip({ day })}
                                 onMouseLeave={() => setTooltip(null)}
                             >
                                 <div className={`${styles.dayNum} ${isToday ? styles.todayNum : ''}`}>
@@ -157,38 +152,37 @@ export default function DeadlineCalendar({ tasks }: Props) {
                                         )}
                                     </div>
                                 )}
+                                {tooltip?.day === day && (
+                                    <div className={styles.tooltip}>
+                                        {dayTasks.map(t => {
+                                            const overdue = t.due_date && new Date(t.due_date) < today && t.status !== 'done';
+                                            return (
+                                                <div key={t.id} className={styles.tooltipItem}>
+                                                    <span
+                                                        className={styles.tooltipDot}
+                                                        style={{
+                                                            background: t.status === 'done'
+                                                                ? '#3ED598'
+                                                                : overdue ? '#E53E3E' : '#9B6DE3',
+                                                        }}
+                                                    />
+                                                    <div className={styles.tooltipContent}>
+                                                        <span className={styles.tooltipTitle}>{t.title}</span>
+                                                        {(t.assignee_name || t.project_name) && (
+                                                            <span className={styles.tooltipMeta}>
+                                                                {[t.assignee_name, t.project_name].filter(Boolean).join(' · ')}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
                             </div>
                         );
                     })}
                 </div>
-
-                {tooltip && tooltipTasks.length > 0 && (
-                    <div className={styles.tooltip}>
-                        {tooltipTasks.map(t => {
-                            const overdue = t.due_date && new Date(t.due_date) < today && t.status !== 'done';
-                            return (
-                                <div key={t.id} className={styles.tooltipItem}>
-                                    <span
-                                        className={styles.tooltipDot}
-                                        style={{
-                                            background: t.status === 'done'
-                                                ? '#3ED598'
-                                                : overdue ? '#E53E3E' : '#9B6DE3',
-                                        }}
-                                    />
-                                    <div className={styles.tooltipContent}>
-                                        <span className={styles.tooltipTitle}>{t.title}</span>
-                                        {(t.assignee_name || t.project_name) && (
-                                            <span className={styles.tooltipMeta}>
-                                                {[t.assignee_name, t.project_name].filter(Boolean).join(' · ')}
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                )}
 
                 <div className={styles.legend}>
                     <div className={styles.legendItem}>
